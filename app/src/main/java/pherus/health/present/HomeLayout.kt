@@ -33,6 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pherus.health.components.Content
+import pherus.health.components.Header
 import pherus.health.ui.theme.PherusTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,22 +45,32 @@ fun HomeLayout() {
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Good morning, la niina",
+                    Text(
+                        text = "Good morning, la niina",
                         fontWeight = FontWeight.Light,
                         fontSize = 12.sp,
                         maxLines = 1
                     )
                 },
                 navigationIcon = {
-                    FilledIconButton(onClick = {}) {
+                    FilledIconButton(
+                        onClick = {},
+                        modifier = Modifier.size(35.dp)
+                    ) {
                         Icon(Icons.Rounded.AccountCircle, contentDescription = null)
                     }
                 },
                 actions = {
-                    FilledIconButton(onClick = {}) {
+                    FilledIconButton(
+                        onClick = {},
+                        modifier = Modifier.size(35.dp)
+                    ) {
                         Icon(Icons.Rounded.Search, contentDescription = null)
                     }
-                    FilledIconButton(onClick = {}) {
+                    FilledIconButton(
+                        onClick = {},
+                        modifier = Modifier.size(35.dp)
+                    ) {
                         Icon(Icons.Rounded.Notifications, contentDescription = null)
                     }
                 }
@@ -67,83 +79,15 @@ fun HomeLayout() {
     ) {
         LazyColumn(
             contentPadding = it,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
-               Row(
-                   modifier = Modifier.fillMaxWidth()
-               ) {
-                   Column(
-                       modifier = Modifier.weight(1.0F)
-                   ) {
-                       Text(text = "Health",
-                           fontWeight = FontWeight.Bold,
-                           fontSize = 40.sp
-                       )
-                       Text(text = "Overview",
-                           fontWeight = FontWeight.Bold,
-                           fontSize = 40.sp
-                       )
-                   }
+                Header()
+            }
 
-                   Column(
-                       modifier = Modifier.weight(1.0F),
-                       verticalArrangement = Arrangement.spacedBy(5.dp)
-                   ) {
-                       Text(text = "Upcoming Appointments",
-                           fontWeight = FontWeight.Light,
-                           fontSize = 12.sp
-                       )
-                       ElevatedCard(
-                           modifier = Modifier.fillMaxWidth()
-                               .height(55.dp)
-                       ) {
-                           Row(
-                               modifier = Modifier.fillMaxWidth()
-                           ) {
-                               ElevatedCard(
-                                   modifier = Modifier.weight(0.7F)
-                                       .fillMaxHeight()
-                               ) {
-                                   Column(
-                                       modifier = Modifier.fillMaxWidth()
-                                           .fillMaxHeight(),
-                                       horizontalAlignment = Alignment.CenterHorizontally,
-                                       verticalArrangement = Arrangement.Center
-                                   ) {
-                                       Text(text = "13")
-                                       Text(text = "WED",
-                                           fontWeight = FontWeight.Bold)
-                                   }
-                               }
-
-                               Column(
-                                   modifier = Modifier
-                                       .weight(1.3F)
-                                       .padding(2.dp)
-                                       .fillMaxHeight(),
-                                   verticalArrangement = Arrangement.Center
-                               ) {
-                                   Text(text = "Paracetamol")
-                                   Row(
-                                       modifier = Modifier.fillMaxWidth(),
-                                       horizontalArrangement = Arrangement.spacedBy(3.dp)
-                                   ) {
-                                       Icon(
-                                           Icons.Rounded.AccountCircle,
-                                           contentDescription = null,
-                                           modifier = Modifier.size(15.dp)
-                                       )
-                                       Text(text = "9:30 am",
-                                           fontWeight = FontWeight.Light,
-                                           fontSize = 12.sp
-                                       )
-                                   }
-                               }
-                           }
-                       }
-                   }
-               }
+            item {
+                Content()
             }
         }
     }
