@@ -7,6 +7,7 @@ android {
     namespace = "pherus.health"
     compileSdk = 34
 
+    android.buildFeatures.buildConfig = true
     defaultConfig {
         applicationId = "pherus.health"
         minSdk = 24
@@ -14,6 +15,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -40,11 +42,13 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.2"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            merges += "META-INF/LICENSE.md"
+            merges += "META-INF/LICENSE-notice.md"
         }
     }
 }
@@ -60,9 +64,19 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended.android)
 
     // compose navigation
     implementation(libs.androidx.navigation.compose)
+
+    // Multidex
+    implementation(libs.gson)
+    implementation(libs.mmkv.static)
+    implementation(libs.androidx.multidex)
+    implementation(libs.accompanist.permissions)
+
+    // Coil Image
+    implementation(libs.coil.compose)
 
     // android libraries
     testImplementation(libs.junit)

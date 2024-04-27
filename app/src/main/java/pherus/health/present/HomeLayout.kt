@@ -35,59 +35,40 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pherus.health.components.Content
 import pherus.health.components.Header
+import pherus.health.components.Toolbar
+import pherus.health.components.Modules
 import pherus.health.ui.theme.PherusTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeLayout() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Good morning, la niina",
-                        fontWeight = FontWeight.Light,
-                        fontSize = 12.sp,
-                        maxLines = 1
-                    )
-                },
-                navigationIcon = {
-                    FilledIconButton(
-                        onClick = {},
-                        modifier = Modifier.size(35.dp)
-                    ) {
-                        Icon(Icons.Rounded.AccountCircle, contentDescription = null)
-                    }
-                },
-                actions = {
-                    FilledIconButton(
-                        onClick = {},
-                        modifier = Modifier.size(35.dp)
-                    ) {
-                        Icon(Icons.Rounded.Search, contentDescription = null)
-                    }
-                    FilledIconButton(
-                        onClick = {},
-                        modifier = Modifier.size(35.dp)
-                    ) {
-                        Icon(Icons.Rounded.Notifications, contentDescription = null)
-                    }
-                }
-            )
-        }
+        topBar = { Toolbar() }
     ) {
-        LazyColumn(
-            contentPadding = it,
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        androidx.compose.foundation.layout.BoxWithConstraints(
+            modifier = Modifier.fillMaxSize().padding(paddingValues = it),
         ) {
-            item {
-                Header()
-            }
+            val parentHeight = maxHeight
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item {
+                    Header()
+                }
 
-            item {
-                Content()
+                item {
+                    Content()
+                }
+
+                item {
+                    androidx.compose.foundation.layout.Row {
+                        androidx.compose.material3.Text(text = "User Modules",
+                            modifier = Modifier.padding(start = 10.dp , end = 10.dp))
+                    }
+
+                    Modules(parentHeight)
+                }
             }
         }
     }
