@@ -10,7 +10,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import pherus.health.config.Routes
-import pherus.health.present.HomeLayout
 import pherus.health.ui.theme.PherusTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             PherusTheme(
                 darkTheme = isSystemInDarkTheme(),
-                dynamicColor = true
+                dynamicColor = false
             ) {
                 val navController = rememberNavController()
                 Surface(

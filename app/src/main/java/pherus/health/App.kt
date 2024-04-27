@@ -1,9 +1,6 @@
 package pherus.health
 
-import android.app.Application
+import androidx.multidex.MultiDexApplication
 
-class App: Application() {
-    override fun onCreate() {
-        super.onCreate()
-    }
+class App : MultiDexApplication() {
 }

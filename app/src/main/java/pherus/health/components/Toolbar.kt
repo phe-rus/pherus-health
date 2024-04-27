@@ -18,10 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Toolbar() {
+fun Toolbar(
+    router: NavHostController
+) {
     TopAppBar(
         title = {
             Text(
@@ -37,7 +40,9 @@ fun Toolbar() {
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 FilledIconButton(
-                    onClick = {},
+                    onClick = {
+                        router.navigate("bio")
+                    },
                     modifier = Modifier.size(35.dp)
                 ) {
                     Icon(Icons.Rounded.AccountCircle, contentDescription = null)

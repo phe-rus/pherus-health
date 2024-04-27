@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import pherus.health.present.HomeLayout
+import pherus.health.present.ProfileLayout
 
 @Composable
 fun Routes(
@@ -18,7 +19,11 @@ fun Routes(
         modifier = Modifier.fillMaxSize()
     ) {
         composable("home") {
-            HomeLayout()
+            HomeLayout(router = navcontroller)
+        }
+
+        composable("bio") {
+            ProfileLayout(router = navcontroller)
         }
     }
 }

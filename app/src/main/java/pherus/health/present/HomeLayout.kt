@@ -1,6 +1,5 @@
 package pherus.health.present
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
@@ -11,20 +10,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import pherus.health.components.Content
 import pherus.health.components.Header
 import pherus.health.components.Modules
 import pherus.health.components.Toolbar
-import pherus.health.ui.theme.PherusTheme
 
 @Composable
-fun HomeLayout() {
+fun HomeLayout(router: NavHostController) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { Toolbar() }
+        topBar = {
+            Toolbar(
+                router = router
+            )
+        }
     ) {
         BoxWithConstraints(
             modifier = Modifier
@@ -56,18 +57,5 @@ fun HomeLayout() {
                 }
             }
         }
-    }
-}
-
-@Preview(
-    showSystemUi = true, showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
-    wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE
-)
-
-@Composable
-fun HomeLayoutPreview() {
-    PherusTheme {
-        HomeLayout()
     }
 }
