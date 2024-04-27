@@ -31,7 +31,7 @@ fun Modules(
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp),
+                    .height(120.dp),
                 shape = RoundedCornerShape(30)
             ) {
 
