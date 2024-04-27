@@ -61,7 +61,9 @@ fun Toolbar(
                     Icon(Icons.Rounded.Search, contentDescription = null)
                 }
                 FilledIconButton(
-                    onClick = {},
+                    onClick = {
+                        router.navigate("notify")
+                    },
                     modifier = Modifier.size(35.dp)
                 ) {
                     Icon(Icons.Rounded.Notifications, contentDescription = null)

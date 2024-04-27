@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import pherus.health.present.HomeLayout
+import pherus.health.present.NotificationLayout
 import pherus.health.present.ProfileLayout
 
 @Composable
@@ -24,6 +25,9 @@ fun Routes(
 
         composable("bio") {
             ProfileLayout(router = navcontroller)
+        }
+        composable("notify") {
+            NotificationLayout(router = navcontroller)
         }
     }
 }

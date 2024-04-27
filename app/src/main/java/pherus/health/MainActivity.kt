@@ -16,16 +16,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val navController = rememberNavController()
-
             PherusTheme(
                 darkTheme = isSystemInDarkTheme(),
                 dynamicColor = false
             ) {
+                val navController = rememberNavController()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    runOnUiThread {
+
+                    }
                     Routes(navcontroller = navController)
                 }
             }
