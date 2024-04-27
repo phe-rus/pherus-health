@@ -1,5 +1,6 @@
 package pherus.health.config
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,20 +15,22 @@ import pherus.health.present.ProfileLayout
 fun Routes(
     navcontroller: NavHostController
 ) {
-    NavHost(
-        navController = navcontroller,
-        startDestination = "home",
-        modifier = Modifier.fillMaxSize()
-    ) {
-        composable("home") {
-            HomeLayout(router = navcontroller)
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        NavHost(
+            navController = navcontroller,
+            startDestination = "home",
+            modifier = Modifier.fillMaxSize()
+        ) {
+            composable("home") {
+                HomeLayout(router = navcontroller)
+            }
 
-        composable("bio") {
-            ProfileLayout(router = navcontroller)
-        }
-        composable("notify") {
-            NotificationLayout(router = navcontroller)
+            composable("bio") {
+                ProfileLayout(router = navcontroller)
+            }
+            composable("notify") {
+                NotificationLayout(router = navcontroller)
+            }
         }
     }
 }
