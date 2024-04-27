@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "180706795521",
+    "firebase_url": "https://pherus-holistic-health-default-rtdb.firebaseio.com",
+    "project_id": "pherus-holistic-health",
+    "storage_bucket": "pherus-holistic-health.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180706795521:android:a1aa8f4f5e6bd920a9a000",
+        "android_client_info": {
+          "package_name": "pherus.health"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "180706795521-1a5u5dirao7hf1bsjull1dee5ci3i2tt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPCJXqS90n4fecOf0EoREBe2NhHmzMjW8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "180706795521-1a5u5dirao7hf1bsjull1dee5ci3i2tt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

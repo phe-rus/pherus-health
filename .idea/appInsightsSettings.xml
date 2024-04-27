@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="pherus.health" />
+                  <option name="mobileSdkAppId" value="1:180706795521:android:a1aa8f4f5e6bd920a9a000" />
+                  <option name="projectId" value="pherus-holistic-health" />
+                  <option name="projectNumber" value="180706795521" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
