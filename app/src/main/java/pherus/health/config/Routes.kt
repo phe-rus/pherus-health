@@ -10,10 +10,12 @@ import androidx.navigation.compose.composable
 import pherus.health.present.HomeLayout
 import pherus.health.present.NotificationLayout
 import pherus.health.present.ProfileLayout
+import pherus.health.viewModel.MainViewModel
 
 @Composable
 fun Routes(
-    navcontroller: NavHostController
+    navcontroller: NavHostController,
+    mainviewmodel: MainViewModel
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(

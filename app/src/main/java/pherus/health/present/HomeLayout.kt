@@ -9,21 +9,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import pherus.health.components.Content
+import pherus.health.components.Footer
 import pherus.health.components.Header
 import pherus.health.components.Modules
 import pherus.health.components.Toolbar
 
 @Composable
 fun HomeLayout(router: NavHostController) {
+    val coroutine = rememberCoroutineScope()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             Toolbar(
-                router = router
+                router = router,
+                scope = coroutine
             )
         }
     ) {
@@ -54,6 +59,10 @@ fun HomeLayout(router: NavHostController) {
                     }
 
                     Modules(parentHeight)
+                }
+
+                item {
+                    Footer()
                 }
             }
         }

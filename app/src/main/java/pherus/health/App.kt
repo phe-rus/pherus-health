@@ -9,6 +9,7 @@ import com.tencent.mmkv.MMKV
 class App : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
+
         MMKV.initialize(this)
 
         FirebaseApp.initializeApp(this).let {

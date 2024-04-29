@@ -19,18 +19,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Toolbar(
-    router: NavHostController
+    router: NavHostController,
+    scope: CoroutineScope
 ) {
     TopAppBar(
         title = {
             Text(
                 text = "Good morning, la niina",
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 15.sp,
                 maxLines = 1
             )
         },
@@ -41,7 +44,9 @@ fun Toolbar(
             ) {
                 FilledIconButton(
                     onClick = {
-                        router.navigate("bio")
+                        scope.launch {
+                            router.navigate("bio")
+                        }
                     },
                     modifier = Modifier.size(35.dp)
                 ) {
@@ -60,9 +65,12 @@ fun Toolbar(
                 ) {
                     Icon(Icons.Rounded.Search, contentDescription = null)
                 }
+
                 FilledIconButton(
                     onClick = {
-                        router.navigate("notify")
+                        scope.launch {
+                            router.navigate("notify")
+                        }
                     },
                     modifier = Modifier.size(35.dp)
                 ) {

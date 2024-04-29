@@ -1,6 +1,8 @@
 package pherus.health.present
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,35 +23,73 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 import pherus.health.R
+import pherus.health.components.Footer
+import pherus.health.ui.theme.PherusTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileLayout(router: NavHostController) {
+    val coroutine = rememberCoroutineScope()
+
+    val patientsInformation = mutableListOf(
+        "Preferred Name",
+        "Date Of Birth",
+        "Email Address",
+        "Phone Number",
+        "Full Name"
+    )
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Settings")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Settings",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 23.sp
+                        )
+                    }
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        router.navigate("home")
-                    }) {
-                        Icon(Icons.Rounded.ArrowBackIosNew, contentDescription = null)
+                    IconButton(
+                        onClick = {
+                            coroutine.launch {
+                                router.navigate("home")
+                            }
+                        },
+                        modifier = Modifier.size(35.dp)
+                    ) {
+                        Icon(
+                            Icons.Rounded.ArrowBackIosNew,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
             )
@@ -67,7 +107,7 @@ fun ProfileLayout(router: NavHostController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp),
-                    shape = RoundedCornerShape(20)
+                    shape = RoundedCornerShape(10)
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Image(
@@ -77,62 +117,108 @@ fun ProfileLayout(router: NavHostController) {
                             modifier = Modifier.fillMaxSize()
                         )
 
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .align(alignment = Alignment.BottomCenter)
-                                .padding(10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(5.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.surfaceContainer.copy(
+                                                alpha = 0.0f
+                                            ),
+                                            MaterialTheme.colorScheme.surfaceContainer.copy(
+                                                alpha = 0.2f
+                                            ),
+                                            MaterialTheme.colorScheme.surfaceContainer.copy(
+                                                alpha = 0.6f
+                                            ),
+                                            MaterialTheme.colorScheme.surfaceContainer.copy(
+                                                alpha = 1.0f
+                                            )
+                                        )
+                                    )
+                                )
                         ) {
-                            FilledIconButton(
-                                onClick = {},
-                                modifier = Modifier.size(55.dp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Rounded.Face2, contentDescription = null)
-                            }
+                                FilledIconButton(
+                                    onClick = {},
+                                    modifier = Modifier.size(55.dp)
+                                ) {
+                                    Icon(Icons.Rounded.Face2, contentDescription = null)
+                                }
 
-                            Column(
-                                horizontalAlignment = Alignment.Start,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = "Patients Name",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 20.sp
-                                )
-                                Text(
-                                    text = "patients@email.com",
-                                    fontWeight = FontWeight.Light,
-                                    fontSize = 16.sp
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.Start,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = "Patients Name",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 20.sp
+                                    )
+                                    Text(
+                                        text = "patients@email.com",
+                                        fontWeight = FontWeight.Light,
+                                        fontSize = 16.sp
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-            item {
-                Text(
-                    text = "Emergency Information",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(5.dp)
-                )
-            }
 
-            items(3) {
-                ElevatedCard(
+            item {
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(34)
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Icon(Icons.Rounded.MedicalInformation, contentDescription = null)
-                        Text(text = "Medical Information")
+                    Text(
+                        text = "Emergency Information",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(5.dp)
+                    )
+
+                    patientsInformation.forEach { item ->
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(34)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 20.dp,
+                                        end = 20.dp,
+                                        top = 10.dp,
+                                        bottom = 10.dp
+                                    ),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(
+                                    Icons.Rounded.MedicalInformation,
+                                    contentDescription = null
+                                )
+                                Column {
+                                    Text(
+                                        text = item,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = item,
+                                        fontWeight = FontWeight.Light
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -188,6 +274,22 @@ fun ProfileLayout(router: NavHostController) {
                     }
                 }
             }
+
+            item {
+                Footer()
+            }
         }
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
+    wallpaper = Wallpapers.BLUE_DOMINATED_EXAMPLE, showSystemUi = true, showBackground = true
+)
+@Composable
+fun ProfilePreview() {
+    val navController = rememberNavController()
+    PherusTheme {
+        ProfileLayout(router = navController)
     }
 }

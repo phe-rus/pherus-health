@@ -1,5 +1,6 @@
 package pherus.health
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,6 +22,7 @@ import pherus.health.ui.theme.PherusTheme
 import pherus.health.viewModel.MainViewModel
 
 class MainActivity : ComponentActivity() {
+    private val viewModel: MainViewModel by viewModels()
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,26 +33,47 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = false
             ) {
                 val navController = rememberNavController()
-                val viewModel: MainViewModel by viewModels()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                     tonalElevation = 0.dp
                 ) {
                     PermissionHandler()
-                    Routes(navcontroller = navController)
+                    Routes(
+                        navcontroller = navController,
+                        mainviewmodel = viewModel
+                    )
                 }
             }
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        fetch()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fetch()
+    }
+
+    private fun fetch() {
+
+    }
+
+    @SuppressLint("InlinedApi")
     @Composable
     fun PermissionHandler() {
         Permissions(
             permissionsContext = this@MainActivity,
             permissionsToRequest = arrayOf(
                 android.Manifest.permission.ACCESS_WIFI_STATE,
-                android.Manifest.permission.POST_NOTIFICATIONS
+                android.Manifest.permission.POST_NOTIFICATIONS,
+                android.Manifest.permission.READ_MEDIA_IMAGES,
+                android.Manifest.permission.READ_MEDIA_AUDIO,
+                android.Manifest.permission.READ_MEDIA_VIDEO,
+                android.Manifest.permission.CAMERA
             ),
             onPermissionGranted = { grantedPermissions ->
                 grantedPermissions.forEach { permissionName ->
