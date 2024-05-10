@@ -17,7 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Face2
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MedicalInformation
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
@@ -107,7 +109,7 @@ fun ProfileLayout(router: NavHostController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp),
-                    shape = RoundedCornerShape(10)
+                    shape = RoundedCornerShape(20)
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Image(
@@ -176,12 +178,96 @@ fun ProfileLayout(router: NavHostController) {
             }
 
             item {
+                ElevatedCard(
+                    shape = RoundedCornerShape(100),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "1EG$-TE5-MK72",
+                                fontWeight = FontWeight.Black
+                            )
+                            Icon(
+                                Icons.Rounded.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+                        Text(
+                            text = "12/12/2027",
+                            fontWeight = FontWeight.Light
+                        )
+                    }
+                }
+            }
+
+            item {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Text(
-                        text = "Emergency Information",
+                        text = "Contact Information",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(5.dp)
+                    )
+
+                    patientsInformation.forEach { item ->
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(34)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 20.dp,
+                                        end = 20.dp,
+                                        top = 10.dp,
+                                        bottom = 10.dp
+                                    ),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(
+                                    Icons.Rounded.MedicalInformation,
+                                    contentDescription = null
+                                )
+                                Column {
+                                    Text(
+                                        text = item,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = item,
+                                        fontWeight = FontWeight.Light
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(
+                        text = "Clinical Profile",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         modifier = Modifier.padding(5.dp)

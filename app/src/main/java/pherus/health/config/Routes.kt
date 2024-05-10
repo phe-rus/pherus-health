@@ -9,6 +9,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import pherus.health.oauth.AuthLayout
+import pherus.health.oauth.CreateLayout
+import pherus.health.oauth.ForgotLayout
 import pherus.health.oauth.IntroLayout
 import pherus.health.present.HomeLayout
 import pherus.health.present.NotificationLayout
@@ -23,7 +25,7 @@ fun Routes(
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
             navController = navcontroller,
-            startDestination = if (mainviewmodel.isAuthenticated()) "companion" else "home",
+            startDestination = if (!mainviewmodel.isAuthenticated()) "companion" else "home",
             modifier = Modifier.fillMaxSize()
         ) {
             composable("home") {
@@ -46,6 +48,18 @@ fun Routes(
 
                 composable("auth") {
                     AuthLayout(
+                        router = navcontroller
+                    )
+                }
+
+                composable("register") {
+                    CreateLayout(
+                        router = navcontroller
+                    )
+                }
+
+                composable("forgot") {
+                    ForgotLayout(
                         router = navcontroller
                     )
                 }

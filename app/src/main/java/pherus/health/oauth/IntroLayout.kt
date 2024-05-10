@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowRightAlt
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -77,17 +79,19 @@ fun IntroLayout(router: NavHostController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(alignment = Alignment.BottomCenter)
-                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Button(
+                FilledIconButton(
                     onClick = {
                         coroutine.launch {
                             router.navigate("auth")
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.size(60.dp)
                 ) {
-                    Text(text = "Continue")
+                    Icon(Icons.AutoMirrored.Rounded.ArrowRightAlt, contentDescription = null)
                 }
             }
         }
