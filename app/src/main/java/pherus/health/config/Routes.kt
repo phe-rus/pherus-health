@@ -25,7 +25,7 @@ fun Routes(
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
             navController = navcontroller,
-            startDestination = if (!mainviewmodel.isAuthenticated()) "companion" else "home",
+            startDestination = if (mainviewmodel.isAuthenticated()) "companion" else "home",
             modifier = Modifier.fillMaxSize()
         ) {
             composable("home") {

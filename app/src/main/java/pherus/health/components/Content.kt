@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -46,7 +46,8 @@ fun Content() {
             Column(
                 modifier = Modifier
             ) {
-                Text(text = "Collection",
+                Text(
+                    text = "Collection",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
@@ -57,7 +58,7 @@ fun Content() {
                 label = { Text(text = "View all") },
                 trailingIcon = {
                     Icon(
-                        Icons.Rounded.KeyboardArrowRight,
+                        Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                         contentDescription = null,
                         modifier = Modifier.size(15.dp)
                     )
@@ -79,7 +80,7 @@ fun Content() {
                     .height(130.dp),
                 shape = RoundedCornerShape(30)
             ) {
-
+                Text(text = "Hello")
             }
 
             ElevatedCard(

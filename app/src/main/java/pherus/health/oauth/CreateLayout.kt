@@ -10,13 +10,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -26,6 +30,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
 import pherus.health.oauth.Authobjects.InputHolder
 import pherus.health.oauth.Authobjects.PasswordHolder
 import pherus.health.oauth.Authobjects.SubTitles
@@ -35,7 +40,8 @@ import pherus.health.oauth.Authobjects.Titles
 fun CreateLayout(router: NavHostController) {
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
-    var localFocusManager = LocalFocusManager.current
+    val localFocusManager = LocalFocusManager.current
+    val coroutine = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -50,6 +56,19 @@ fun CreateLayout(router: NavHostController) {
                     })
                 }
         ) {
+            FilledIconButton(
+                onClick = {
+                    coroutine.launch {
+                        router.navigate("auth")
+                    }
+                },
+                modifier = Modifier
+                    .align(alignment = Alignment.TopStart)
+                    .padding(10.dp)
+            ) {
+                Icon(Icons.Rounded.ArrowBackIosNew, contentDescription = null)
+            }
+
             Icon(
                 painter = painterResource(id = pherus.health.R.drawable.pherus),
                 contentDescription = null,

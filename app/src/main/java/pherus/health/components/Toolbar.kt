@@ -1,21 +1,20 @@
 package pherus.health.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -31,52 +30,32 @@ fun Toolbar(
     TopAppBar(
         title = {
             Text(
-                text = "Good morning, la niina",
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                maxLines = 1
+                text = "Pherus Health",
+                fontWeight = FontWeight.Black,
+                fontSize = 23.sp,
+                maxLines = 1,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
         },
-        navigationIcon = {
-            Row(
-                modifier = Modifier.padding(start = 5.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+        actions = {
+            FilledIconButton(
+                onClick = {
+                    scope.launch {
+                        router.navigate("bio")
+                    }
+                },
             ) {
-                FilledIconButton(
-                    onClick = {
-                        scope.launch {
-                            router.navigate("bio")
-                        }
-                    },
-                    modifier = Modifier.size(35.dp)
-                ) {
-                    Icon(Icons.Rounded.AccountCircle, contentDescription = null)
-                }
+                Icon(
+                    Icons.Rounded.AccountCircle,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(0.dp)
+                )
             }
         },
-        actions = {
-            Row(
-                modifier = Modifier.padding(end = 5.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                FilledIconButton(
-                    onClick = {},
-                    modifier = Modifier.size(35.dp)
-                ) {
-                    Icon(Icons.Rounded.Search, contentDescription = null)
-                }
-
-                FilledIconButton(
-                    onClick = {
-                        scope.launch {
-                            router.navigate("notify")
-                        }
-                    },
-                    modifier = Modifier.size(35.dp)
-                ) {
-                    Icon(Icons.Rounded.Notifications, contentDescription = null)
-                }
-            }
-        }
+        modifier = Modifier.fillMaxWidth(),
+        scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     )
 }

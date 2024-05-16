@@ -16,10 +16,27 @@ object Config {
         "fuck you", "mother fucker", "cork sucker", "idiot"
     )
 
+
     fun isNetworkAvailable(context: Context): Boolean {
         val cnManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         return false
     }
+
+    data class UserAuthentication(
+        val email: String? = null,
+        val password: String? = null,
+        val onListener: (UserAccount) -> Unit,
+        val onError: (String) -> Unit
+    )
+
+    data class UserAccount(
+        val name: String? = null,
+        val email: String? = null,
+        val uid: String? = null,
+        val verify: Boolean? = null
+    )
+
+
 }
