@@ -9,9 +9,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import pherus.health.oauth.AuthLayout
-import pherus.health.oauth.CreateLayout
-import pherus.health.oauth.ForgotLayout
 import pherus.health.oauth.IntroLayout
+import pherus.health.oauth.SetupLayout
 import pherus.health.present.HomeLayout
 import pherus.health.present.NotificationLayout
 import pherus.health.present.ProfileLayout
@@ -31,14 +30,12 @@ fun Routes(
             composable("home") {
                 HomeLayout(router = navcontroller)
             }
-
             composable("bio") {
                 ProfileLayout(router = navcontroller)
             }
             composable("notify") {
                 NotificationLayout(router = navcontroller)
             }
-
             navigation(startDestination = "intro", route = "companion") {
                 composable("intro") {
                     IntroLayout(
@@ -48,19 +45,15 @@ fun Routes(
 
                 composable("auth") {
                     AuthLayout(
-                        router = navcontroller
+                        router = navcontroller,
+                        viewmodel = mainviewmodel
                     )
                 }
 
-                composable("register") {
-                    CreateLayout(
-                        router = navcontroller
-                    )
-                }
-
-                composable("forgot") {
-                    ForgotLayout(
-                        router = navcontroller
+                composable("setup") {
+                    SetupLayout(
+                        router = navcontroller,
+                        viewmodel = mainviewmodel
                     )
                 }
             }

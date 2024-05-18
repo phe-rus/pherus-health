@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Pherus</string>
+    <string name="description">**Pherus Health: Revolutionizing Comprehensive Healthcare**\n\n
+Pherus Health is a holistic and comprehensive medical system that aims to redefine healthcare by seamlessly integrating all facets of the medical and health sectors. Our platform connects patients, doctors, nurses, labs, institutions, interprofessional`s, pharmacies, logistics, communication services, intensive care units, donation services, manufacturers, medical boards, communities, and more. Designed to provide a truly holistic approach to healthcare, Pherus Health empowers you with the entire medical and health ecosystem at your fingertips, ensuring a cohesive and efficient healthcare experience.</string>
+
+    <string name="basic_info_title">Basic Information</string>
+    <string name="contact_info_title">Contact Information</string>
+    <string name="basic_info_subtitle">This information will be displayed on your profile to professionals and only preferred name will be displayed in incidences of research and data collection</string>
+    <string name="contact_info_subtitle">This information as self explanatory will be used as reference point to contact you</string>
 </resources>

@@ -23,7 +23,9 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:description="@string/app_name"
         android:enableOnBackInvokedCallback="true"
+        android:fitsSystemWindows="true"
         android:fullBackupContent="@xml/backup_rules"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:logo="@drawable/pherus"
@@ -37,6 +39,7 @@
             android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask"
+            android:windowSoftInputMode="stateVisible|adjustResize"
             tools:ignore="RedundantLabel">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -47,7 +50,7 @@
         <service
             android:name=".services.PherusTiles"
             android:exported="true"
-            android:icon="@drawable/ic_launcher_foreground"
+            android:icon="@drawable/pherus"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <meta-data

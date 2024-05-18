@@ -2,6 +2,8 @@ package pherus.health
 
 import androidx.multidex.MultiDexApplication
 import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.ktx.appCheck
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.tencent.mmkv.MMKV
@@ -15,5 +17,8 @@ class App : MultiDexApplication() {
         FirebaseApp.initializeApp(this).let {
             Firebase.database.setPersistenceEnabled(true)
         }
+       // Firebase.appCheck.installAppCheckProviderFactory(
+          //  PlayIntegrityAppCheckProviderFactory.getInstance(),
+        //)
     }
 }

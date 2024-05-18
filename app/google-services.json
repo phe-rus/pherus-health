@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "180706795521-1a2vbvvlsat8bp6m2acbgn23d0ph2kcf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pherus.health",
+            "certificate_hash": "ec1661fb7976c612133cfd72f1a2501a66c9e3b4"
+          }
+        },
+        {
           "client_id": "180706795521-1a5u5dirao7hf1bsjull1dee5ci3i2tt.apps.googleusercontent.com",
           "client_type": 3
         }

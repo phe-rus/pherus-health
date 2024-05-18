@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id("com.google.devtools.ksp")
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.material)
     implementation(libs.androidx.material.icons.extended.android)
 
     // compose navigation
@@ -80,6 +81,10 @@ dependencies {
     implementation(libs.androidx.multidex)
     implementation(libs.accompanist.permissions)
 
+    //Room
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
     // Coil Image
     implementation(libs.coil.compose)
     implementation(libs.haze)
@@ -89,6 +94,9 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.database)
+    implementation(libs.firebase.ui.auth)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // android libraries
     testImplementation(libs.junit)
