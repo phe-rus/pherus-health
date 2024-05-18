@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="deploymentTargetSelector">
+    <selectionStates>
+      <SelectionState runConfigName="app">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2024-05-17T11:34:16.564276395Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="FirebaseDirectAccess" identifier="reservation=projects/pherus-holistic-health/deviceSessions/session-i90ysq7gs9rma" />
+            </handle>
+            <template>
+              <DeviceId pluginId="FirebaseDirectAccess" type="TEMPLATE" identifier="model_id=b0q/33" />
+            </template>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection />
+      </SelectionState>
+    </selectionStates>
+  </component>
+</project>
