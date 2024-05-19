@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android") apply false
 }
 
 android {
@@ -42,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        dataBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.2"
@@ -56,6 +58,7 @@ android {
 }
 
 dependencies {
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -81,10 +84,6 @@ dependencies {
     implementation(libs.androidx.multidex)
     implementation(libs.accompanist.permissions)
 
-    //Room
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
     // Coil Image
     implementation(libs.coil.compose)
     implementation(libs.haze)
@@ -97,6 +96,38 @@ dependencies {
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.kotlinx.coroutines.play.services)
+
+    // Sheets Compose
+    implementation(libs.sheets.compose.core)
+    implementation(libs.sheets.compose.calendar)
+    implementation(libs.sheets.compose.state)
+    implementation(libs.sheets.compose.rating)
+    implementation(libs.sheets.compose.option)
+    implementation(libs.sheets.compose.list)
+    implementation(libs.sheets.compose.input)
+    implementation(libs.sheets.compose.info)
+    implementation(libs.sheets.compose.duration)
+    implementation(libs.sheets.compose.date.time)
+    implementation(libs.sheets.compose.color)
+    implementation(libs.sheets.compose.clock)
+
+    // viewmodel
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.0")
+
+    //Serialization
+    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+
+    // Worker manager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.work:work-multiprocess:2.9.0")
+
+    // Material3 Android
+    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation(libs.play.services.location)
 
     // android libraries
     testImplementation(libs.junit)

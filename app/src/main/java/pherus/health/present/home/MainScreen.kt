@@ -24,9 +24,10 @@ import androidx.compose.ui.unit.sp
 import pherus.health.R
 import pherus.health.components.Content
 import pherus.health.components.Header
+import pherus.health.viewModel.MainViewModel
 
 @Composable
-fun MainScreen() {
+fun MainScreen(viewmodel: MainViewModel) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(10.dp)

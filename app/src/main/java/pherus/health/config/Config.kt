@@ -33,6 +33,7 @@ object Config {
     data class BasicInformations(
         val preferedName: String? = null,
         val genderIdentity: String? = null,
+        val avatarHolder: String? = null,
         val createdAt: String? = null
     ) : Serializable
 
@@ -78,5 +79,4 @@ object Config {
         val consentContext: String? = null,
         val consentAgreement: Boolean? = false
     ) : Serializable
-
 }

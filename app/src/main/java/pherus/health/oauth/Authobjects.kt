@@ -1,6 +1,9 @@
 package pherus.health.oauth
 
+import android.annotation.SuppressLint
 import androidx.annotation.Keep
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +23,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -31,15 +35,21 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import pherus.health.components.WideCalendar
 import pherus.health.config.Validation.isStrongPassword
 import java.io.Serializable
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object Authobjects {
     @Composable
     fun InputHolder(
-        header: String, onValueChange: (String) -> Unit
+        header: String,
+        defaultValue: String? = "",
+        onValueChange: (String) -> Unit
     ) {
-        var value by rememberSaveable { mutableStateOf("") }
+        var showCalander by rememberSaveable { mutableStateOf(false) }
+        var value by rememberSaveable { mutableStateOf(defaultValue.toString()) }
         LaunchedEffect(value) {
             onValueChange(value)
         }
@@ -48,6 +58,7 @@ object Authobjects {
                 value = ""
             }
         }
+
         OutlinedTextField(
             value = value,
             onValueChange = { input -> value = input },
@@ -60,6 +71,7 @@ object Authobjects {
                     maxLines = 1
                 )
             },
+            readOnly = checkforSpecial(header, "date of birth"),
             textStyle = TextStyle(
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.sp,
@@ -67,8 +79,38 @@ object Authobjects {
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(44.dp)
+                .height(44.dp),
+            interactionSource = remember { MutableInteractionSource() }
+                .also { interactionSource ->
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect {
+                            if (it is PressInteraction.Release) {
+                                if (checkforSpecial(header, "date of birth")) {
+                                    showCalander = true
+                                }
+                            }
+                        }
+                    }
+                }
         )
+
+        if (showCalander) {
+            WideCalendar(
+                closeSelection = {
+                    showCalander = false
+                },
+                selectedValue = { ldate ->
+                    value = ldate
+                }
+            )
+        }
+    }
+
+    fun checkforSpecial(
+        header: String,
+        vlr: String
+    ): Boolean {
+        return header.contains(vlr, true)
     }
 
     @Composable
@@ -174,9 +216,17 @@ object Authobjects {
         )
     }
 
+    @SuppressLint("NewApi")
+    fun getCurrentDate(): String {
+        val now = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("MMMM-dd-yyyy") // Customize the format here
+        return now.format(formatter)
+    }
+
     @Keep
     @Immutable
     data class ProfileProps(
+        val key: String? = null,
         val title: String,
         val subtitle: String,
         val list: MutableList<ValueProps>
@@ -185,6 +235,7 @@ object Authobjects {
     @Keep
     @Immutable
     data class ValueProps(
+        val key: String? = null,
         val value: String,
         val onchangelistener: (String) -> Unit
     ) : Serializable

@@ -7,4 +7,6 @@ Pherus Health is a holistic and comprehensive medical system that aims to redefi
     <string name="contact_info_title">Contact Information</string>
     <string name="basic_info_subtitle">This information will be displayed on your profile to professionals and only preferred name will be displayed in incidences of research and data collection</string>
     <string name="contact_info_subtitle">This information as self explanatory will be used as reference point to contact you</string>
+
+    <string name="default_web_client_id">180706795521-1a5u5dirao7hf1bsjull1dee5ci3i2tt.apps.googleusercontent.com</string>
 </resources>

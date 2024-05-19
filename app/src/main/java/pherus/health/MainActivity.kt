@@ -12,17 +12,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import pherus.health.config.Permissions
 import pherus.health.config.Routes
 import pherus.health.ui.theme.PherusTheme
 import pherus.health.viewModel.MainViewModel
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,11 +40,37 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = false
             ) {
                 val navController = rememberNavController()
+                val fusedLocationClient =
+                    remember { LocationServices.getFusedLocationProviderClient(this@MainActivity) }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                     tonalElevation = 0.dp
                 ) {
+                    LaunchedEffect(Unit) {
+                        delay(300)
+                        viewModel.getLocation(fusedLocationClient) { latitude, longitude ->
+                            viewModel.getCountryFromLocation(
+                                this@MainActivity,
+                                latitude,
+                                longitude
+                            ) { country, locality ->
+                                viewModel.isPreferenceStore(
+                                    key = "Country",
+                                    value = country!!
+                                )
+                                viewModel.isPreferenceStore(
+                                    key = "LocalAddress",
+                                    value = locality!!
+                                )
+                            }
+                        }
+                    }
+
+                    runOnUiThread {
+                        fetch()
+                    }
+
                     PermissionHandler()
                     Routes(
                         navcontroller = navController,
@@ -58,8 +91,16 @@ class MainActivity : ComponentActivity() {
         fetch()
     }
 
+    override fun onResume() {
+        super.onResume()
+        fetch()
+    }
+    
     private fun fetch() {
-
+        pherus.health.viewModel.FirebaseModule
+        viewModel.fetchFromDatabase {
+            println("error logs: $it")
+        }
     }
 
     @SuppressLint("InlinedApi")
@@ -73,7 +114,9 @@ class MainActivity : ComponentActivity() {
                 android.Manifest.permission.READ_MEDIA_IMAGES,
                 android.Manifest.permission.READ_MEDIA_AUDIO,
                 android.Manifest.permission.READ_MEDIA_VIDEO,
-                android.Manifest.permission.CAMERA
+                android.Manifest.permission.CAMERA,
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
             ),
             onPermissionGranted = { grantedPermissions ->
                 grantedPermissions.forEach { permissionName ->

@@ -1,13 +1,11 @@
 package pherus.health.local
 
 /**
-import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
-
-@Database(entities = [], version = 1, exportSchema = false)
+@Database(entities = [PatientInformationDao::class], version = 1, exportSchema = false)
+@TypeConverters(Converters::class)
 abstract class LocalHost : RoomDatabase() {
+abstract fun paitentInfo(): PatientInformationDao
+
 companion object {
 @Volatile
 private var INSTANCE: LocalHost? = null
@@ -28,4 +26,5 @@ return instance
 }
 }
 }
-} **/
+}
+ **/

@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -22,9 +23,10 @@ import pherus.health.present.home.FeatureScreen
 import pherus.health.present.home.MainScreen
 import pherus.health.present.home.NotiScreen
 import pherus.health.present.home.ProfileScreen
+import pherus.health.viewModel.MainViewModel
 
 @Composable
-fun HomeLayout(router: NavHostController) {
+fun HomeLayout(router: NavHostController, viewmodel: MainViewModel) {
     val coroutine = rememberCoroutineScope()
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
@@ -32,12 +34,15 @@ fun HomeLayout(router: NavHostController) {
     val lazyScroll = rememberLazyListState()
     val scrollState = rememberScrollState()
 
+    val profileInformtion = viewmodel.usrCollection.collectAsState().value
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             Toolbar(
                 router = router,
-                scope = coroutine
+                scope = coroutine,
+                basicInfor = profileInformtion?.basicInformations?.avatarHolder.toString()
             )
         },
         bottomBar = {
@@ -56,7 +61,9 @@ fun HomeLayout(router: NavHostController) {
                 .padding(paddingValues = padv)
         ) {
             composable("0") {
-                MainScreen()
+                MainScreen(
+                    viewmodel = viewmodel
+                )
             }
             composable("1") {
                 FeatureScreen()
@@ -68,7 +75,8 @@ fun HomeLayout(router: NavHostController) {
             }
             composable("3") {
                 ProfileScreen(
-                    scrollstate = scrollState
+                    scrollstate = scrollState,
+                    viewmodel = viewmodel
                 )
             }
         }
