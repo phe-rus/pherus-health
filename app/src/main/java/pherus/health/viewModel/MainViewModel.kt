@@ -1,8 +1,12 @@
 package pherus.health.viewModel
 
+import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.location.Geocoder
+import android.net.Uri
 import android.os.Parcelable
+import android.provider.OpenableColumns
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -26,15 +30,21 @@ import com.google.firebase.database.DatabaseException
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.storage.FirebaseStorage
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import pherus.health.R
+import pherus.health.config.Config.HealthModule
 import pherus.health.config.Config.PatientInformation
 import java.io.IOException
 import java.util.Locale
@@ -47,6 +57,9 @@ class MainViewModel : ViewModel() {
 
     private val _usrCollection = MutableStateFlow<PatientInformation?>(null)
     val usrCollection: StateFlow<PatientInformation?> = _usrCollection.asStateFlow()
+
+    private val _remoteCollection = MutableStateFlow<List<HealthModule>?>(null)
+    val remoteCollection: StateFlow<List<HealthModule>?> = _remoteCollection.asStateFlow()
 
     private var lastFetchedData: PatientInformation? = null
 
@@ -62,6 +75,14 @@ class MainViewModel : ViewModel() {
             MmkvManager.ID_SETTING,
             MMKV.MULTI_PROCESS_MODE
         )
+    }
+
+    fun initail() {
+        fetchModules()
+        fetchLocalModules()
+        fetchFromDatabase {
+            println("error logs: $it")
+        }
     }
 
     @Composable
@@ -132,7 +153,7 @@ class MainViewModel : ViewModel() {
             .await()
     }
 
-    fun fetchFromDatabase(
+    private fun fetchFromDatabase(
         errorHandler: (String) -> Unit
     ) {
         val userUid = isCurrentUserUid() // Exit if UID unavailable?: null
@@ -162,6 +183,48 @@ class MainViewModel : ViewModel() {
 
     fun isLogOut() {
         auth.signOut()
+    }
+
+    fun uploadImage(
+        context: Context,
+        imageUri: Uri,
+        uploadUrl: String? = null,
+        onUploadState: (Boolean) -> Unit
+    ) {
+        val result = getImageNameAndExtension(context, imageUri)
+        storage.run {
+            onUploadState(true)
+            getReference("patients")
+                .child(isCurrentUserUid())
+                .child("profileAvatar")
+                .child("${result!!.first}.${result.second}")
+                .putFile(imageUri)
+                .addOnSuccessListener { taskSnapshot ->
+                    taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            writeToDatabase(
+                                key = uploadUrl,
+                                value = downloadUri.toString(),
+                                onComplete = { success, error ->
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        onUploadState(!success)
+                                        if (error != null) {
+                                            println("Error uploading image: ${error.message}")
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }?.addOnFailureListener { exception ->
+                        onUploadState(false)
+                        println("Error getting download URL: ${exception.message}")
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    onUploadState(false)
+                    println("Error uploading file: ${exception.message}")
+                }
+        }
     }
 
     fun isPreferenceStore(key: String, value: Any): Boolean {
@@ -203,10 +266,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun isPreferenceRetrieve(
-        key: String,
-        defaultValue: Any? = null
-    ): Any? {
+    fun isPreferenceRetrieve(key: String, defaultValue: Any? = null): Any? {
         return when {
             mainStorage.containsKey(key) -> {
                 when (defaultValue) {
@@ -217,28 +277,43 @@ class MainViewModel : ViewModel() {
                     is Float -> mainStorage.decodeFloat(key, defaultValue)
                     is Double -> mainStorage.decodeDouble(key, defaultValue)
                     is ByteArray -> mainStorage.decodeBytes(key)
-                    is Set<*> -> {
-                        val result = mainStorage.decodeStringSet(key)
-                        if (result != null) result else defaultValue
+                    is Set<*> -> mainStorage.decodeStringSet(key) ?: defaultValue
+                    is Parcelable -> {
+                        val clazz = defaultValue::class.java as? Class<Parcelable>
+                        clazz?.let { mainStorage.decodeParcelable(key, it) } ?: defaultValue
                     }
 
-                    else -> {
-                        // For Parcelable and other custom types
-                        if (defaultValue is Parcelable) {
-                            val clazz = defaultValue::class.java as? Class<Parcelable>
-                            if (clazz != null) {
-                                mainStorage.decodeParcelable(key, clazz) ?: defaultValue
-                            } else {
-                                null
-                            }
-                        } else {
-                            null
-                        }
-                    }
+                    else -> null
                 }
             }
 
             else -> defaultValue
+        }
+    }
+
+    private fun fetchModules() {
+        val remoteConfig = Firebase.remoteConfig
+        remoteConfig.setDefaultsAsync(mapOf("health_features" to "[]"))
+        remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val featuresPref = isPreferenceRetrieve("health_features", "[]") as? String
+                val featuresJson = remoteConfig.getString("health_features")
+                if (!featuresJson.contentEquals(featuresPref)) {
+                    isPreferenceStore("health_features", featuresJson)
+                }
+            } else {
+                println("Fetch failed")
+            }
+        }.addOnFailureListener {
+            println("Fetch failed with exception: ${it.message}")
+        }
+    }
+
+    private fun fetchLocalModules() {
+        val featuresJson = isPreferenceRetrieve("health_features", "[]") as? String
+        featuresJson?.let {
+            val features: List<HealthModule> = parseFeatures(it)
+            _remoteCollection.value = features
         }
     }
 
@@ -260,7 +335,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun getCountryFromLocation(
-        context: android.content.Context,
+        context: Context,
         latitude: Double,
         longitude: Double,
         onAddressReceived: (String?, String?) -> Unit
@@ -289,5 +364,55 @@ class MainViewModel : ViewModel() {
             }
         }
         return null
+    }
+
+    private fun parseFeatures(json: String): List<HealthModule> {
+        val gson = Gson()
+        val type = object : TypeToken<List<HealthModule>>() {}.type
+        val modules: List<HealthModule> = gson.fromJson(json, type)
+        return modules
+    }
+
+    private fun getImageNameAndExtension(context: Context, imageUri: Uri): Pair<String, String>? {
+        var name: String? = null
+        var extension: String? = null
+
+        // First, try to get the display name and extension from the ContentResolver
+        val cursor: Cursor? = context.contentResolver.query(imageUri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex != -1) {
+                    name = it.getString(nameIndex)
+                }
+            }
+        }
+
+        // If the name is found, extract the extension
+        name?.let {
+            val dotIndex = it.lastIndexOf('.')
+            if (dotIndex != -1) {
+                extension = it.substring(dotIndex + 1)
+            }
+        }
+
+        // If the name is not found using ContentResolver, try to extract from the Uri path
+        if (name == null) {
+            val path = imageUri.path
+            path?.let {
+                val lastSlashIndex = it.lastIndexOf('/')
+                if (lastSlashIndex != -1) {
+                    name = it.substring(lastSlashIndex + 1)
+                    val dotIndex = name?.lastIndexOf('.')
+                    if (dotIndex != -1) {
+                        if (dotIndex != null) {
+                            extension = name?.substring(dotIndex + 1)
+                        }
+                    }
+                }
+            }
+        }
+
+        return if (name != null && extension != null) Pair(name!!, extension!!) else null
     }
 }

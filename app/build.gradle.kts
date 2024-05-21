@@ -94,6 +94,8 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.firebase.database)
     implementation(libs.firebase.ui.auth)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.config)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.kotlinx.coroutines.play.services)
 
@@ -112,21 +114,21 @@ dependencies {
     implementation(libs.sheets.compose.clock)
 
     // viewmodel
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.0")
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
 
     //Serialization
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation(libs.kotlinx.serialization.json)
 
     // Worker manager
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
-    implementation("androidx.work:work-multiprocess:2.9.0")
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.work.multiprocess)
 
     // Material3 Android
-    implementation("androidx.preference:preference-ktx:1.2.1")
-    implementation("com.google.android.material:material:1.12.0")
+    implementation(libs.androidx.preference.ktx)
+    implementation(libs.google.material)
     implementation(libs.play.services.location)
 
     // android libraries

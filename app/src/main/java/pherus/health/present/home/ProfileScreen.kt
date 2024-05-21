@@ -16,11 +16,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import pherus.health.viewModel.MainViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -40,6 +42,11 @@ fun ProfileScreen(scrollstate: ScrollState, viewmodel: MainViewModel) {
         "Partnership and Sponsors" to "",
         "Open source licenses" to ""
     )
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        viewmodel.initail()
+    }
 
     FlowColumn(
         modifier = Modifier
@@ -166,10 +173,10 @@ fun ProfileScreen(scrollstate: ScrollState, viewmodel: MainViewModel) {
                 modifier = Modifier.padding(start = 10.dp)
             )
 
-            emergencyDetails.forEachIndexed { index, pair ->
+            emergencyDetails.forEachIndexed { _, pair ->
                 ProfileDisplay(
                     title = pair.first,
-                    value = pair.second.toString()
+                    value = pair.second
                 )
             }
         }

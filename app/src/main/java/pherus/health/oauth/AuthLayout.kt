@@ -61,6 +61,7 @@ fun AuthLayout(router: NavHostController, viewmodel: MainViewModel) {
                     "basicInformations" to BasicInformations(
                         preferedName = result.user!!.displayName,
                         genderIdentity = "unknown",
+                        avatarHolder = result.user!!.photoUrl.toString(),
                         createdAt = getCurrentDate()
                     ),
                     "contactInformation" to ContactInformation(
@@ -83,27 +84,36 @@ fun AuthLayout(router: NavHostController, viewmodel: MainViewModel) {
                         )
                     )
                 )
-                viewmodel.writeToDatabase(value = response) { success, error ->
-                    if (success) {
-                        coroutine.launch {
-                            router.navigate("home")
-                            isLoadingbar = false
-                        }
-                    } else {
-                        error?.let {
+                if (viewmodel.isUserAvailable()) {
+                    viewmodel.writeToDatabase(value = response) { success, error ->
+                        if (success) {
                             coroutine.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = "Error writing data: $it"
-                                )
+                                router.navigate("home")
                                 isLoadingbar = false
                             }
+                        } else {
+                            error?.let {
+                                coroutine.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Error writing data: $it"
+                                    )
+                                    isLoadingbar = false
+                                }
+                            }
                         }
+                    }
+                } else {
+                    coroutine.launch {
+                        router.navigate("home")
+                        isLoadingbar = false
+                        isLoading = false
                     }
                 }
             }
         }
     ) { _ ->
         isLoadingbar = false
+        isLoading = false
     }
 
     val token = stringResource(R.string.default_web_client_id)

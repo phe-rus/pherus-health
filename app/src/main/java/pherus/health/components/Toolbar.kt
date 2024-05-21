@@ -1,11 +1,12 @@
 package pherus.health.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -40,12 +41,16 @@ fun Toolbar(
             )
         },
         actions = {
-            FilledIconButton(
+            OutlinedIconButton(
                 onClick = {
                     scope.launch {
                         router.navigate("bio")
                     }
                 },
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary
+                ),
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(basicInfor),

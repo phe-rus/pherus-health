@@ -15,12 +15,14 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import pherus.health.R
 import pherus.health.components.Content
 import pherus.health.components.Header
@@ -28,6 +30,11 @@ import pherus.health.viewModel.MainViewModel
 
 @Composable
 fun MainScreen(viewmodel: MainViewModel) {
+    LaunchedEffect(Unit) {
+        delay(100)
+        viewmodel.initail()
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(10.dp)

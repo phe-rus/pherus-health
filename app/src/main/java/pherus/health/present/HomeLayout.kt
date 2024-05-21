@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -17,6 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
 import pherus.health.components.Bottombars
 import pherus.health.components.Toolbar
 import pherus.health.present.home.FeatureScreen
@@ -27,14 +29,19 @@ import pherus.health.viewModel.MainViewModel
 
 @Composable
 fun HomeLayout(router: NavHostController, viewmodel: MainViewModel) {
-    val coroutine = rememberCoroutineScope()
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    val coroutine = rememberCoroutineScope()
 
     val navController = rememberNavController()
     val lazyScroll = rememberLazyListState()
     val scrollState = rememberScrollState()
 
     val profileInformtion = viewmodel.usrCollection.collectAsState().value
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        viewmodel.initail()
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -66,7 +73,10 @@ fun HomeLayout(router: NavHostController, viewmodel: MainViewModel) {
                 )
             }
             composable("1") {
-                FeatureScreen()
+                FeatureScreen(
+                    router = router,
+                    viewmodel = viewmodel
+                )
             }
             composable("2") {
                 NotiScreen(

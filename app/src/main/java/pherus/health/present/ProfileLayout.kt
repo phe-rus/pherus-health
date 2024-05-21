@@ -1,6 +1,10 @@
 package pherus.health.present
 
-import android.content.res.Configuration
+import android.net.Uri
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,9 +20,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
-import androidx.compose.material.icons.rounded.Face2
+import androidx.compose.material.icons.rounded.ContactPhone
+import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.MarkEmailRead
 import androidx.compose.material.icons.rounded.MedicalInformation
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,73 +38,133 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import pherus.health.R
 import pherus.health.components.Footer
-import pherus.health.ui.theme.PherusTheme
+import pherus.health.components.LoadingState
+import pherus.health.components.WideCalendar
+import pherus.health.components.WideEditor
+import pherus.health.config.Config.PatientInformation
+import pherus.health.config.Config.ProfInformation
+import pherus.health.viewModel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileLayout(router: NavHostController) {
+fun ProfileLayout(router: NavHostController, viewmodel: MainViewModel) {
+    val profileInformtion = viewmodel.usrCollection.collectAsState().value
+    val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
 
+    var calenderShow by rememberSaveable { mutableStateOf(false) }
+
+    var profileEditor by rememberSaveable { mutableStateOf(false) }
+    var profileTitle by rememberSaveable { mutableStateOf("") }
+    var profileKeyMap by rememberSaveable { mutableStateOf("") }
+    var profileValue by rememberSaveable { mutableStateOf("") }
+
+    var imgpickerLoader by rememberSaveable { mutableStateOf(false) }
+
     val patientsInformation = mutableListOf(
-        "Preferred Name",
-        "Date Of Birth",
-        "Email Address",
-        "Phone Number",
-        "Full Name"
+        "Preferred Name", "Date Of Birth", "Email Address", "Phone Number", "Full Name"
     )
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Settings",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 23.sp
-                        )
+    val profileDetails = mutableListOf(
+        ProfInformation(
+            title = "Preferred Name",
+            value = profileInformtion?.basicInformations?.preferedName,
+            keyMap = "basicInformations/preferedName",
+            icon = Icons.Rounded.Person
+        ), ProfInformation(
+            title = "Email Address",
+            value = profileInformtion?.contactInformation?.email,
+            keyMap = "contactInformation/email",
+            icon = Icons.Rounded.MarkEmailRead
+        ), ProfInformation(
+            title = "Phone Number",
+            value = profileInformtion?.contactInformation?.phoneNumber,
+            keyMap = "contactInformation/phoneNumber",
+            icon = Icons.Rounded.ContactPhone
+        ), ProfInformation(
+            title = "Local Address",
+            value = profileInformtion?.contactInformation?.localAddress,
+            keyMap = "contactInformation/localAddress",
+            icon = Icons.Rounded.LocationOn
+        ), ProfInformation(
+            title = "Date Of Birth",
+            value = profileInformtion?.contactInformation?.dateOfbirth,
+            keyMap = "contactInformation/dateOfbirth",
+            icon = Icons.Rounded.DateRange
+        )
+    )
+
+    val pickMedia =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                viewmodel.uploadImage(
+                    context = context,
+                    imageUri = uri,
+                    uploadUrl = "basicInformations/avatarHolder",
+                    onUploadState = {
+                        imgpickerLoader = it
                     }
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            coroutine.launch {
-                                router.navigate("home")
-                            }
-                        },
-                        modifier = Modifier.size(35.dp)
-                    ) {
-                        Icon(
-                            Icons.Rounded.ArrowBackIosNew,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            )
+                )
+            } else {
+                println("PhotoPicker No media selected")
+            }
         }
-    ) {
+
+    LaunchedEffect(Unit, pickMedia) {
+        delay(100)
+        viewmodel.initail()
+    }
+
+    Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
+        TopAppBar(title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Settings", fontWeight = FontWeight.Bold, fontSize = 23.sp
+                )
+            }
+        }, navigationIcon = {
+            IconButton(
+                onClick = {
+                    coroutine.launch {
+                        router.popBackStack()
+                    }
+                }, modifier = Modifier.size(35.dp)
+            ) {
+                Icon(
+                    Icons.Rounded.ArrowBackIosNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        })
+    }) {
         LazyColumn(
             contentPadding = it,
             modifier = Modifier
@@ -105,82 +173,16 @@ fun ProfileLayout(router: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             item {
-                ElevatedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    shape = RoundedCornerShape(20)
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_launcher_background),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(alignment = Alignment.BottomCenter)
-                                .background(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.surfaceContainer.copy(
-                                                alpha = 0.0f
-                                            ),
-                                            MaterialTheme.colorScheme.surfaceContainer.copy(
-                                                alpha = 0.2f
-                                            ),
-                                            MaterialTheme.colorScheme.surfaceContainer.copy(
-                                                alpha = 0.6f
-                                            ),
-                                            MaterialTheme.colorScheme.surfaceContainer.copy(
-                                                alpha = 1.0f
-                                            )
-                                        )
-                                    )
-                                )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp),
-                                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                FilledIconButton(
-                                    onClick = {},
-                                    modifier = Modifier.size(55.dp)
-                                ) {
-                                    Icon(Icons.Rounded.Face2, contentDescription = null)
-                                }
-
-                                Column(
-                                    horizontalAlignment = Alignment.Start,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        text = "Patients Name",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp
-                                    )
-                                    Text(
-                                        text = "patients@email.com",
-                                        fontWeight = FontWeight.Light,
-                                        fontSize = 16.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                ProfileCover(
+                    coroutine = coroutine,
+                    profileInformtion = profileInformtion,
+                    pickMedia = pickMedia
+                )
             }
 
             item {
                 ElevatedCard(
-                    shape = RoundedCornerShape(100),
-                    colors = CardDefaults.elevatedCardColors(
+                    shape = RoundedCornerShape(100), colors = CardDefaults.elevatedCardColors(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
@@ -196,8 +198,7 @@ fun ProfileLayout(router: NavHostController) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "1EG$-TE5-MK72",
-                                fontWeight = FontWeight.Black
+                                text = "PAT-TE5M-K723UG", fontWeight = FontWeight.Black
                             )
                             Icon(
                                 Icons.Rounded.Info,
@@ -205,10 +206,12 @@ fun ProfileLayout(router: NavHostController) {
                                 modifier = Modifier.size(15.dp)
                             )
                         }
-                        Text(
-                            text = "12/12/2027",
-                            fontWeight = FontWeight.Light
-                        )
+                        profileInformtion?.basicInformations?.run {
+                            Text(
+                                text = createdAt.toString().replace("-", "/"),
+                                fontWeight = FontWeight.Light
+                            )
+                        }
                     }
                 }
             }
@@ -225,38 +228,23 @@ fun ProfileLayout(router: NavHostController) {
                         modifier = Modifier.padding(5.dp)
                     )
 
-                    patientsInformation.forEach { item ->
-                        ElevatedCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(34)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        start = 20.dp,
-                                        end = 20.dp,
-                                        top = 10.dp,
-                                        bottom = 10.dp
-                                    ),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Icon(
-                                    Icons.Rounded.MedicalInformation,
-                                    contentDescription = null
-                                )
-                                Column {
-                                    Text(
-                                        text = item,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = item,
-                                        fontWeight = FontWeight.Light
-                                    )
-                                }
+                    profileDetails.forEachIndexed { _, profInformation ->
+                        ProfileComponents(profInformation = profInformation, onClickListener = {
+                            if (profInformation.title == "Date Of Birth") {
+                                calenderShow = true
+                                profileKeyMap = profInformation.keyMap.toString()
                             }
-                        }
+                            if (!profInformation.title!!.contains(
+                                    "Email Address",
+                                    true
+                                ) && !profInformation.title.contains("Date Of Birth", true)
+                            ) {
+                                profileEditor = true
+                                profileValue = profInformation.value.toString()
+                                profileTitle = profInformation.title
+                                profileKeyMap = profInformation.keyMap.toString()
+                            }
+                        })
                     }
                 }
             }
@@ -275,32 +263,24 @@ fun ProfileLayout(router: NavHostController) {
 
                     patientsInformation.forEach { item ->
                         ElevatedCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(34)
+                            modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(34)
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(
-                                        start = 20.dp,
-                                        end = 20.dp,
-                                        top = 10.dp,
-                                        bottom = 10.dp
-                                    ),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp
+                                    ), horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 Icon(
-                                    Icons.Rounded.MedicalInformation,
-                                    contentDescription = null
+                                    Icons.Rounded.MedicalInformation, contentDescription = null
                                 )
                                 Column {
                                     Text(
-                                        text = item,
-                                        fontWeight = FontWeight.Bold
+                                        text = item, fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = item,
-                                        fontWeight = FontWeight.Light
+                                        text = item, fontWeight = FontWeight.Light
                                     )
                                 }
                             }
@@ -320,8 +300,7 @@ fun ProfileLayout(router: NavHostController) {
 
             items(1) {
                 ElevatedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(34)
+                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(34)
                 ) {
                     Row(
                         modifier = Modifier
@@ -336,46 +315,187 @@ fun ProfileLayout(router: NavHostController) {
             }
 
             item {
-                Text(
-                    text = "Help & Support",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(5.dp)
+                Footer()
+            }
+        }
+
+        if (imgpickerLoader) {
+            LoadingState(
+                closeSelection = {
+                    imgpickerLoader = false
+                }
+            )
+        }
+
+        if (profileEditor) {
+            WideEditor(title = profileTitle, defaultValue = profileValue, closeSelection = {
+                profileEditor = false
+            }, onValueListener = { initValue ->
+                coroutine.launch {
+                    viewmodel.writeToDatabase(key = profileKeyMap,
+                        value = initValue,
+                        onComplete = { success, _ ->
+                            if (initValue.isNotEmpty()) {
+                                if (success) {
+                                    profileEditor = false
+                                    profileKeyMap = ""
+                                    profileTitle = ""
+                                    profileValue = ""
+                                }
+                            }
+                        })
+                }
+            })
+        }
+
+        if (calenderShow) {
+            WideCalendar(closeSelection = {
+                calenderShow = false
+            }, selectedValue = { dob ->
+                coroutine.launch {
+                    viewmodel.writeToDatabase(key = profileKeyMap,
+                        value = dob,
+                        onComplete = { success, _ ->
+                            if (dob.isNotEmpty()) {
+                                if (success) {
+                                    calenderShow = false
+                                    profileKeyMap = ""
+                                }
+                            }
+                        })
+                }
+                println("Selected Date: $it")
+            })
+        }
+    }
+}
+
+
+@Composable
+fun ProfileComponents(
+    profInformation: ProfInformation, onClickListener: () -> Unit
+) {
+    ElevatedCard(modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(34),
+        onClick = { onClickListener() }) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp
+                ), horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            profInformation.run {
+                Icon(
+                    icon!!, contentDescription = null
                 )
             }
-
-            items(5) {
-                ElevatedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(34)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Icon(Icons.Rounded.MedicalInformation, contentDescription = null)
-                        Text(text = "Medical Information")
-                    }
+            Column {
+                profInformation.run {
+                    Text(
+                        text = title.toString(), fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = value.toString(), fontWeight = FontWeight.Light
+                    )
                 }
-            }
-
-            item {
-                Footer()
             }
         }
     }
 }
 
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
-    wallpaper = Wallpapers.BLUE_DOMINATED_EXAMPLE, showSystemUi = true, showBackground = true
-)
 @Composable
-fun ProfilePreview() {
-    val navController = rememberNavController()
-    PherusTheme {
-        ProfileLayout(router = navController)
+fun ProfileCover(
+    profileInformtion: PatientInformation?,
+    pickMedia: ManagedActivityResultLauncher<PickVisualMediaRequest, Uri?>,
+    coroutine: CoroutineScope
+) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp), shape = RoundedCornerShape(12)
+    ) {
+        val coverImage = profileInformtion?.basicInformations?.coverBackground
+        Box(modifier = Modifier.fillMaxSize()) {
+            val painter = coverImage?.let {
+                rememberAsyncImagePainter(it)
+            } ?: painterResource(id = R.drawable.cover_image)
+
+            Image(
+                painter = painter,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(alignment = Alignment.BottomCenter)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surfaceContainer.copy(
+                                    alpha = 0.0f
+                                ), MaterialTheme.colorScheme.surfaceContainer.copy(
+                                    alpha = 0.2f
+                                ), MaterialTheme.colorScheme.surfaceContainer.copy(
+                                    alpha = 0.6f
+                                ), MaterialTheme.colorScheme.surfaceContainer.copy(
+                                    alpha = 1.0f
+                                )
+                            )
+                        )
+                    )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilledIconButton(
+                        onClick = {
+                            coroutine.launch {
+                                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            }
+                        },
+                        modifier = Modifier.size(55.dp)
+                    ) {
+                        profileInformtion?.basicInformations?.run {
+                            Image(
+                                painter = rememberAsyncImagePainter(avatarHolder),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(0.dp)
+                            )
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        profileInformtion?.basicInformations?.run {
+                            Text(
+                                text = preferedName.toString(),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp
+                            )
+                        }
+                        profileInformtion?.contactInformation?.run {
+                            Text(
+                                text = email.toString(),
+                                fontWeight = FontWeight.Light,
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

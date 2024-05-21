@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import pherus.health.oauth.AuthLayout
 import pherus.health.oauth.IntroLayout
+import pherus.health.present.HealthModule
 import pherus.health.present.HomeLayout
 import pherus.health.present.NotificationLayout
 import pherus.health.present.ProfileLayout
@@ -33,10 +34,20 @@ fun Routes(
                 )
             }
             composable("bio") {
-                ProfileLayout(router = navcontroller)
+                ProfileLayout(
+                    router = navcontroller,
+                    viewmodel = mainviewmodel
+                )
             }
             composable("notify") {
                 NotificationLayout(router = navcontroller)
+            }
+            composable("modules/{extra}") { backStackEntry ->
+                HealthModule(
+                    router = navcontroller,
+                    viewmodel = mainviewmodel,
+                    extra = backStackEntry.arguments?.getString("extra")
+                )
             }
             navigation(
                 startDestination = "intro",

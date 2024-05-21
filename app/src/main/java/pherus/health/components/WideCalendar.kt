@@ -3,7 +3,6 @@ package pherus.health.components
 import android.annotation.SuppressLint
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import com.maxkeppeker.sheets.core.models.base.UseCaseState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
@@ -18,10 +17,6 @@ internal fun WideCalendar(
     closeSelection: UseCaseState.() -> Unit,
     selectedValue: (String) -> Unit
 ) {
-
-    LaunchedEffect(selectedValue) {
-        selectedValue("")
-    }
     CalendarDialog(
         state = rememberUseCaseState(visible = true, onCloseRequest = { closeSelection() }),
         config = CalendarConfig(

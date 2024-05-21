@@ -28,6 +28,7 @@ import androidx.navigation.NavHostController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationLayout(router: NavHostController) {
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {

@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val fusedLocationClient =
                     remember { LocationServices.getFusedLocationProviderClient(this@MainActivity) }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
@@ -95,12 +96,9 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         fetch()
     }
-    
+
     private fun fetch() {
-        pherus.health.viewModel.FirebaseModule
-        viewModel.fetchFromDatabase {
-            println("error logs: $it")
-        }
+        viewModel.initail()
     }
 
     @SuppressLint("InlinedApi")
