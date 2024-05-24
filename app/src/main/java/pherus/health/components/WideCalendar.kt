@@ -9,6 +9,7 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("NewApi")
@@ -28,9 +29,14 @@ internal fun WideCalendar(
             if (newDates.isNotEmpty()) {
                 val selectedDate = newDates.first()
                 val day = selectedDate.dayOfMonth
-                val month = selectedDate.monthValue
+                val month = selectedDate.month
                 val year = selectedDate.year
-                selectedValue("$day/$month/$year")
+                selectedValue(
+                    "${
+                        month.name.lowercase(Locale.ROOT)
+                            .replaceFirstChar { it.uppercase(Locale.ROOT) }
+                    } $day /$year"
+                )
             } else {
                 selectedValue("")
             }

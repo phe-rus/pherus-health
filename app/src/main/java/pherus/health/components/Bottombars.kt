@@ -24,15 +24,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-
-data class BottomHelper(
-    val title: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
-    val hasNotification: Boolean,
-    val badgeCount: Int? = null
-)
+import pherus.health.config.Config.BottomHelper
 
 @Composable
 fun Bottombars(

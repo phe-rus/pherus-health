@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Pherus</string>
+    <string name="app_full_name">Pherus Health</string>
+    <string name="login_subtitle">Login in to Pherus Health by sliding to unlock, this will promote a Google authentication dialog to appear.</string>
     <string name="description">**Pherus Health: Revolutionizing Comprehensive Healthcare**\n\n
 Pherus Health is a holistic and comprehensive medical system that aims to redefine healthcare by seamlessly integrating all facets of the medical and health sectors. Our platform connects patients, doctors, nurses, labs, institutions, interprofessional`s, pharmacies, logistics, communication services, intensive care units, donation services, manufacturers, medical boards, communities, and more. Designed to provide a truly holistic approach to healthcare, Pherus Health empowers you with the entire medical and health ecosystem at your fingertips, ensuring a cohesive and efficient healthcare experience.</string>
 
@@ -9,4 +11,6 @@ Pherus Health is a holistic and comprehensive medical system that aims to redefi
     <string name="contact_info_subtitle">This information as self explanatory will be used as reference point to contact you</string>
 
     <string name="default_web_client_id">180706795521-1a5u5dirao7hf1bsjull1dee5ci3i2tt.apps.googleusercontent.com</string>
+    <string name="recurrence">Recurrence</string>
+    <string name="end_date">End Date</string>
 </resources>

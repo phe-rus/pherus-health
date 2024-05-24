@@ -6,11 +6,12 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="Theme.Pherus.Splash" parent="Theme.Pherus">
+    <style name="Theme.Pherus.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#34362D</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/pherus</item>
         <item name="postSplashScreenTheme">@style/Theme.Pherus</item>
         <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="splashScreenIconSize">20dp</item>
         <item name="android:windowSplashScreenBehavior" tools:ignore="NewApi">icon_preferred</item>
     </style>
 </resources>

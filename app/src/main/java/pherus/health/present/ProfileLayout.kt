@@ -120,14 +120,12 @@ fun ProfileLayout(router: NavHostController, viewmodel: MainViewModel) {
     val pickMedia =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             if (uri != null) {
-                viewmodel.uploadImage(
-                    context = context,
+                viewmodel.uploadImage(context = context,
                     imageUri = uri,
                     uploadUrl = "basicInformations/avatarHolder",
                     onUploadState = {
                         imgpickerLoader = it
-                    }
-                )
+                    })
             } else {
                 println("PhotoPicker No media selected")
             }
@@ -164,9 +162,9 @@ fun ProfileLayout(router: NavHostController, viewmodel: MainViewModel) {
                 )
             }
         })
-    }) {
+    }) { pdv ->
         LazyColumn(
-            contentPadding = it,
+            contentPadding = pdv,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(start = 10.dp, end = 10.dp),
@@ -235,8 +233,7 @@ fun ProfileLayout(router: NavHostController, viewmodel: MainViewModel) {
                                 profileKeyMap = profInformation.keyMap.toString()
                             }
                             if (!profInformation.title!!.contains(
-                                    "Email Address",
-                                    true
+                                    "Email Address", true
                                 ) && !profInformation.title.contains("Date Of Birth", true)
                             ) {
                                 profileEditor = true
@@ -320,11 +317,9 @@ fun ProfileLayout(router: NavHostController, viewmodel: MainViewModel) {
         }
 
         if (imgpickerLoader) {
-            LoadingState(
-                closeSelection = {
-                    imgpickerLoader = false
-                }
-            )
+            LoadingState(closeSelection = {
+                imgpickerLoader = false
+            })
         }
 
         if (profileEditor) {
@@ -332,7 +327,8 @@ fun ProfileLayout(router: NavHostController, viewmodel: MainViewModel) {
                 profileEditor = false
             }, onValueListener = { initValue ->
                 coroutine.launch {
-                    viewmodel.writeToDatabase(key = profileKeyMap,
+                    viewmodel.writeToDatabase(
+                        key = profileKeyMap,
                         value = initValue,
                         onComplete = { success, _ ->
                             if (initValue.isNotEmpty()) {
@@ -349,23 +345,25 @@ fun ProfileLayout(router: NavHostController, viewmodel: MainViewModel) {
         }
 
         if (calenderShow) {
-            WideCalendar(closeSelection = {
-                calenderShow = false
-            }, selectedValue = { dob ->
-                coroutine.launch {
-                    viewmodel.writeToDatabase(key = profileKeyMap,
-                        value = dob,
-                        onComplete = { success, _ ->
-                            if (dob.isNotEmpty()) {
-                                if (success) {
-                                    calenderShow = false
-                                    profileKeyMap = ""
+            WideCalendar(
+                closeSelection = {
+                    calenderShow = false
+                }, selectedValue = { dob ->
+                    coroutine.launch {
+                        viewmodel.writeToDatabase(
+                            key = profileKeyMap,
+                            value = dob,
+                            onComplete = { success, _ ->
+                                if (dob.isNotEmpty()) {
+                                    if (success) {
+                                        calenderShow = false
+                                        profileKeyMap = ""
+                                    }
                                 }
-                            }
-                        })
+                            })
+                    }
                 }
-                println("Selected Date: $it")
-            })
+            )
         }
     }
 }
@@ -460,8 +458,7 @@ fun ProfileCover(
                             coroutine.launch {
                                 pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                             }
-                        },
-                        modifier = Modifier.size(55.dp)
+                        }, modifier = Modifier.size(55.dp)
                     ) {
                         profileInformtion?.basicInformations?.run {
                             Image(

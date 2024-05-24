@@ -84,29 +84,33 @@ fun AuthLayout(router: NavHostController, viewmodel: MainViewModel) {
                         )
                     )
                 )
-                if (viewmodel.isUserAvailable()) {
-                    viewmodel.writeToDatabase(value = response) { success, error ->
-                        if (success) {
-                            coroutine.launch {
-                                router.navigate("home")
-                                isLoadingbar = false
-                            }
-                        } else {
-                            error?.let {
+                when {
+                    viewmodel.isUserAvailable() -> {
+                        coroutine.launch {
+                            router.navigate("home")
+                            isLoadingbar = false
+                            isLoading = false
+                        }
+                    }
+
+                    else -> {
+                        viewmodel.writeToDatabase(value = response) { success, error ->
+                            if (success) {
                                 coroutine.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = "Error writing data: $it"
-                                    )
+                                    router.navigate("home")
                                     isLoadingbar = false
+                                }
+                            } else {
+                                error?.let {
+                                    coroutine.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Error writing data: $it"
+                                        )
+                                        isLoadingbar = false
+                                    }
                                 }
                             }
                         }
-                    }
-                } else {
-                    coroutine.launch {
-                        router.navigate("home")
-                        isLoadingbar = false
-                        isLoading = false
                     }
                 }
             }
@@ -146,10 +150,10 @@ fun AuthLayout(router: NavHostController, viewmodel: MainViewModel) {
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 Titles(
-                    title = "Pherus Health"
+                    title = stringResource(id = R.string.app_full_name)
                 )
                 SubTitles(
-                    subtitle = "Login in to Pherus Health by sliding to unlock, this will promote a Google authentication dialog to appear."
+                    subtitle = stringResource(id = R.string.login_subtitle)
                 )
                 SlideToUnlock(
                     isLoading = isLoading,

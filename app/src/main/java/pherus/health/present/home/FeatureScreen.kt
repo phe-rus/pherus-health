@@ -18,10 +18,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Notes
+import androidx.compose.material.icons.rounded.AccessAlarm
+import androidx.compose.material.icons.rounded.Bed
+import androidx.compose.material.icons.rounded.Cyclone
+import androidx.compose.material.icons.rounded.Emergency
+import androidx.compose.material.icons.rounded.Fastfood
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Medication
 import androidx.compose.material.icons.rounded.Money
+import androidx.compose.material.icons.rounded.Psychology
 import androidx.compose.material.icons.rounded.PushPin
 import androidx.compose.material.icons.rounded.Science
+import androidx.compose.material.icons.rounded.SportsGymnastics
+import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,7 +39,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -60,13 +68,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import pherus.health.viewModel.MainViewModel
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FeatureScreen(router: NavHostController, viewmodel: MainViewModel) {
     val scrollState = rememberScrollState()
     val coroutine = rememberCoroutineScope()
     val features = viewmodel.remoteCollection.collectAsState().value
     var menuDropdown by rememberSaveable { mutableStateOf(false) }
+    var menuSelected by rememberSaveable { mutableStateOf("All") }
 
     val menuLists = mutableListOf(
         "All",
@@ -226,14 +235,14 @@ fun FeatureScreen(router: NavHostController, viewmodel: MainViewModel) {
                         menuDropdown = true
                     },
                     label = {
-                        Text(text = "All")
+                        Text(text = menuSelected)
                     },
                     shape = RoundedCornerShape(100)
                 )
 
                 if (menuDropdown) {
                     DropdownMenu(
-                        expanded = menuDropdown,
+                        expanded = true,
                         onDismissRequest = {
                             menuDropdown = false
                         },
@@ -246,10 +255,12 @@ fun FeatureScreen(router: NavHostController, viewmodel: MainViewModel) {
                                         text = item,
                                         fontWeight = FontWeight.Light,
                                         fontSize = 12.sp,
-                                        lineHeight = 12.sp
+                                        lineHeight = 12.sp,
+                                        color = if (menuSelected.contains(item)) MaterialTheme.colorScheme.primary else Color.Gray
                                     )
                                 },
                                 onClick = {
+                                    menuSelected = item
                                     menuDropdown = false
                                 }
                             )
@@ -261,123 +272,143 @@ fun FeatureScreen(router: NavHostController, viewmodel: MainViewModel) {
 
         HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
-        features?.filter { it.enabled }
-            ?.forEachIndexed { _, healthModule ->
-                Box(modifier = Modifier.fillMaxSize()) {
-                    OutlinedCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            coroutine.launch {
-                                router.navigate(route = "modules/${healthModule.name}")
-                            }
+        features?.filter {
+            if (menuSelected == "All") it.enabled else !it.enabled
+        }?.forEachIndexed { _, healthModule ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                OutlinedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        coroutine.launch {
+                            router.navigate(route = "modules/${healthModule.name}")
                         }
+                    }
+                ) {
+                    val icon = healthModule.name.run {
+                        when {
+                            contains("general", true) -> Icons.Rounded.Emergency
+                            contains("water", true) -> Icons.Rounded.WaterDrop
+                            contains("medicine", true) -> Icons.Rounded.Medication
+                            contains("sleep", true) -> Icons.Rounded.Bed
+                            contains("appointments", true) -> Icons.Rounded.AccessAlarm
+                            contains("diet", true) -> Icons.Rounded.Fastfood
+                            contains("physical", true) -> Icons.Rounded.SportsGymnastics
+                            contains("menstrual", true) -> Icons.Rounded.Cyclone
+                            contains("mental", true) -> Icons.Rounded.Psychology
+                            else -> Icons.Rounded.Science
+                        }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            modifier = Modifier.weight(0.7F),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.weight(0.7F),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                IconButton(onClick = {}) {
-                                    Icon(Icons.Rounded.Science, contentDescription = null)
-                                }
-                                Column {
-                                    Text(
-                                        text = healthModule.name,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = healthModule.description,
-                                        fontWeight = FontWeight.Light,
-                                        fontSize = 8.sp,
-                                        lineHeight = 8.sp,
-                                        maxLines = 3,
-                                        overflow = TextOverflow.Ellipsis,
-                                        softWrap = true,
-                                        modifier = Modifier.padding(end = 10.dp)
-                                    )
-                                }
+                            IconButton(onClick = {}) {
+                                Icon(
+                                    icon,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(45.dp)
+                                )
                             }
-
-                            Row(
-                                modifier = Modifier.weight(0.3F),
-                                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                verticalAlignment = Alignment.Bottom
-                            ) {
-                                ElevatedCard(
-                                    modifier = Modifier
-                                        .height(10.dp)
-                                        .width(8.dp),
-                                    colors = CardDefaults.elevatedCardColors(
-                                        MaterialTheme.colorScheme.primary
-                                    )
-                                ) {}
-
-                                ElevatedCard(
-                                    modifier = Modifier
-                                        .height(30.dp)
-                                        .width(8.dp),
-                                    colors = CardDefaults.elevatedCardColors(
-                                        MaterialTheme.colorScheme.primary
-                                    )
-                                ) {}
-
-                                ElevatedCard(
-                                    modifier = Modifier
-                                        .height(20.dp)
-                                        .width(8.dp),
-                                    colors = CardDefaults.elevatedCardColors(
-                                        MaterialTheme.colorScheme.primary
-                                    )
-                                ) {}
-
-                                ElevatedCard(
-                                    modifier = Modifier
-                                        .height(50.dp)
-                                        .width(8.dp),
-                                    colors = CardDefaults.elevatedCardColors(
-                                        MaterialTheme.colorScheme.primary
-                                    )
-                                ) {}
-
-                                ElevatedCard(
-                                    modifier = Modifier
-                                        .height(5.dp)
-                                        .width(8.dp),
-                                    colors = CardDefaults.elevatedCardColors(
-                                        MaterialTheme.colorScheme.primary
-                                    )
-                                ) {}
-
-                                ElevatedCard(
-                                    modifier = Modifier
-                                        .height(15.dp)
-                                        .width(8.dp),
-                                    colors = CardDefaults.elevatedCardColors(
-                                        MaterialTheme.colorScheme.primary
-                                    )
-                                ) {}
+                            Column {
+                                Text(
+                                    text = healthModule.name,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = healthModule.description,
+                                    fontWeight = FontWeight.Light,
+                                    fontSize = 8.sp,
+                                    lineHeight = 8.sp,
+                                    maxLines = 3,
+                                    overflow = TextOverflow.Ellipsis,
+                                    softWrap = true,
+                                    modifier = Modifier.padding(end = 10.dp)
+                                )
                             }
                         }
-                    }
 
-                    if (healthModule.enabled) {
-                        Icon(
-                            Icons.Rounded.PushPin,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .align(alignment = Alignment.TopEnd)
-                                .padding(5.dp)
-                                .rotate(30F)
-                        )
+                        Row(
+                            modifier = Modifier.weight(0.3F),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            ElevatedCard(
+                                modifier = Modifier
+                                    .height(10.dp)
+                                    .width(8.dp),
+                                colors = CardDefaults.elevatedCardColors(
+                                    MaterialTheme.colorScheme.primary
+                                )
+                            ) {}
+
+                            ElevatedCard(
+                                modifier = Modifier
+                                    .height(30.dp)
+                                    .width(8.dp),
+                                colors = CardDefaults.elevatedCardColors(
+                                    MaterialTheme.colorScheme.primary
+                                )
+                            ) {}
+
+                            ElevatedCard(
+                                modifier = Modifier
+                                    .height(20.dp)
+                                    .width(8.dp),
+                                colors = CardDefaults.elevatedCardColors(
+                                    MaterialTheme.colorScheme.primary
+                                )
+                            ) {}
+
+                            ElevatedCard(
+                                modifier = Modifier
+                                    .height(50.dp)
+                                    .width(8.dp),
+                                colors = CardDefaults.elevatedCardColors(
+                                    MaterialTheme.colorScheme.primary
+                                )
+                            ) {}
+
+                            ElevatedCard(
+                                modifier = Modifier
+                                    .height(5.dp)
+                                    .width(8.dp),
+                                colors = CardDefaults.elevatedCardColors(
+                                    MaterialTheme.colorScheme.primary
+                                )
+                            ) {}
+
+                            ElevatedCard(
+                                modifier = Modifier
+                                    .height(15.dp)
+                                    .width(8.dp),
+                                colors = CardDefaults.elevatedCardColors(
+                                    MaterialTheme.colorScheme.primary
+                                )
+                            ) {}
+                        }
                     }
                 }
+
+                if (healthModule.enabled) {
+                    Icon(
+                        Icons.Rounded.PushPin,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(alignment = Alignment.TopEnd)
+                            .padding(5.dp)
+                            .rotate(30F)
+                    )
+                }
             }
+        }
 
         Spacer(modifier = Modifier.size(20.dp))
     }

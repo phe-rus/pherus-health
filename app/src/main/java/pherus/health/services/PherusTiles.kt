@@ -48,7 +48,7 @@ class PherusTiles : TileService() {
     // Function to get state from service (replace with your actual implementation)
     private fun getStateFromService(): StateModel {
         return StateModel(
-            enabled = false,
+            enabled = true,
             label = "Pherus Health",
             icon = Icon.createWithResource(this, R.drawable.pherus)
         )
