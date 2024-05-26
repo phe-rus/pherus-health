@@ -14,13 +14,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import pherus.health.config.Permissions
 import pherus.health.config.Routes
 import pherus.health.ui.theme.PherusTheme
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = false
             ) {
                 val navController = rememberNavController()
+                val coroutine = rememberCoroutineScope()
                 val fusedLocationClient =
                     remember { LocationServices.getFusedLocationProviderClient(this@MainActivity) }
 
@@ -49,21 +51,33 @@ class MainActivity : ComponentActivity() {
                     tonalElevation = 0.dp
                 ) {
                     LaunchedEffect(Unit) {
-                        delay(300)
                         viewModel.getLocation(fusedLocationClient) { latitude, longitude ->
                             viewModel.getCountryFromLocation(
                                 this@MainActivity,
                                 latitude,
                                 longitude
                             ) { country, locality ->
-                                viewModel.isPreferenceStore(
-                                    key = "Country",
-                                    value = country!!
-                                )
-                                viewModel.isPreferenceStore(
-                                    key = "LocalAddress",
-                                    value = locality!!
-                                )
+                                if (country.toString().isNotEmpty()) {
+                                    coroutine.launch {
+                                        viewModel.generatePatientsId(
+                                            countryName = country.toString()
+                                        )
+                                    }
+                                }
+                                if (viewModel.isPreferenceRetrieve("Country").toString()
+                                        .isEmpty()
+                                ) {
+                                    viewModel.isPreferenceStore(
+                                        key = "Country",
+                                        value = country!!
+                                    )
+
+
+                                    viewModel.isPreferenceStore(
+                                        key = "LocalAddress",
+                                        value = locality!!
+                                    )
+                                }
                             }
                         }
                     }
@@ -110,9 +124,6 @@ class MainActivity : ComponentActivity() {
                 android.Manifest.permission.ACCESS_WIFI_STATE,
                 android.Manifest.permission.POST_NOTIFICATIONS,
                 android.Manifest.permission.READ_MEDIA_IMAGES,
-                android.Manifest.permission.READ_MEDIA_AUDIO,
-                android.Manifest.permission.READ_MEDIA_VIDEO,
-                android.Manifest.permission.CAMERA,
                 android.Manifest.permission.ACCESS_FINE_LOCATION,
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
             ),

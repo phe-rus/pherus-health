@@ -14,6 +14,7 @@ import pherus.health.present.HealthModule
 import pherus.health.present.HomeLayout
 import pherus.health.present.NotificationLayout
 import pherus.health.present.ProfileLayout
+import pherus.health.present.ServicesLayout
 import pherus.health.viewModel.MainViewModel
 
 @Composable
@@ -24,7 +25,7 @@ fun Routes(
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
             navController = navcontroller,
-            startDestination = if (mainviewmodel.isAuthenticated()) "companion" else "home",
+            startDestination = if (mainviewmodel.isAuthenticated()) "home" else "companion",
             modifier = Modifier.fillMaxSize()
         ) {
             composable("home") {
@@ -41,6 +42,12 @@ fun Routes(
             }
             composable("notify") {
                 NotificationLayout(router = navcontroller)
+            }
+            composable("services/{extra}") { backStackEntry ->
+                ServicesLayout(
+                    router = navcontroller,
+                    extra = backStackEntry.arguments?.getString("extra")
+                )
             }
             composable("modules/{extra}") { backStackEntry ->
                 HealthModule(

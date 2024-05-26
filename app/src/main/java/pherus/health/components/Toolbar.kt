@@ -16,17 +16,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Toolbar(
-    router: NavHostController,
-    scope: CoroutineScope,
-    basicInfor: String
+    basicInfor: String,
+    onClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -39,11 +35,7 @@ fun Toolbar(
         },
         actions = {
             OutlinedIconButton(
-                onClick = {
-                    scope.launch {
-                        router.navigate("bio")
-                    }
-                },
+                onClick = onClick,
                 border = BorderStroke(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.primary

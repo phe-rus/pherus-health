@@ -137,31 +137,34 @@ fun ProfileLayout(router: NavHostController, viewmodel: MainViewModel) {
     }
 
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-        TopAppBar(title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Settings", fontWeight = FontWeight.Bold, fontSize = 23.sp
-                )
+        TopAppBar(
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Settings", fontWeight = FontWeight.Bold, fontSize = 23.sp
+                    )
+                }
+            },
+            navigationIcon = {
+                IconButton(
+                    onClick = {
+                        coroutine.launch {
+                            router.popBackStack()
+                        }
+                    }, modifier = Modifier.size(35.dp)
+                ) {
+                    Icon(
+                        Icons.Rounded.ArrowBackIosNew,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
-        }, navigationIcon = {
-            IconButton(
-                onClick = {
-                    coroutine.launch {
-                        router.popBackStack()
-                    }
-                }, modifier = Modifier.size(35.dp)
-            ) {
-                Icon(
-                    Icons.Rounded.ArrowBackIosNew,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        })
+        )
     }) { pdv ->
         LazyColumn(
             contentPadding = pdv,
@@ -192,12 +195,15 @@ fun ProfileLayout(router: NavHostController, viewmodel: MainViewModel) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "PAT-TE5M-K723UG", fontWeight = FontWeight.Black
-                            )
+                            profileInformtion?.basicInformations?.run {
+                                Text(
+                                    text = patientsId.toString(),
+                                    fontWeight = FontWeight.Black
+                                )
+                            }
                             Icon(
                                 Icons.Rounded.Info,
                                 contentDescription = null,

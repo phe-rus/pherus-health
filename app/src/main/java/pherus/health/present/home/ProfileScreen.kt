@@ -34,7 +34,7 @@ fun ProfileScreen(scrollstate: ScrollState, viewmodel: MainViewModel) {
         "Preferred Name" to profileInformtion?.basicInformations?.preferedName,
         "Email Address" to profileInformtion?.contactInformation?.email,
         "Phone Number" to profileInformtion?.contactInformation?.phoneNumber,
-        "Emergency Number" to profileInformtion?.contactInformation?.localAddress
+        "Emergency Number" to "default is 911"
     )
     val emergencyDetails = mutableListOf(
         "Help & Support" to "",
@@ -67,7 +67,7 @@ fun ProfileScreen(scrollstate: ScrollState, viewmodel: MainViewModel) {
                 modifier = Modifier.padding(start = 10.dp)
             )
 
-            profileDetails.forEachIndexed { index, pair ->
+            profileDetails.forEachIndexed { _, pair ->
                 ProfileDisplay(
                     title = pair.first,
                     value = pair.second.toString()
@@ -80,7 +80,7 @@ fun ProfileScreen(scrollstate: ScrollState, viewmodel: MainViewModel) {
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             Text(
-                text = "Pherus Pay",
+                text = "Pherus Health Pay",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 maxLines = 1,
@@ -103,27 +103,7 @@ fun ProfileScreen(scrollstate: ScrollState, viewmodel: MainViewModel) {
                         fontSize = 18.sp,
                         maxLines = 1
                     )
-                    Text(text = "undefined")
-                }
-            }
-
-            ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(30)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Purchase Details",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        maxLines = 1
-                    )
-                    Text(text = "undefined")
+                    Text(text = profileInformtion?.contactInformation?.countryResident ?: "Unknown")
                 }
             }
         }
@@ -151,12 +131,12 @@ fun ProfileScreen(scrollstate: ScrollState, viewmodel: MainViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Gender",
+                        text = "Emergency Evidence Recording's",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         maxLines = 1
                     )
-                    Text(text = "undefined")
+                    Text(text = "non")
                 }
             }
         }

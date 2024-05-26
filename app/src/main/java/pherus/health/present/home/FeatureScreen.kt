@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,9 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.AccessAlarm
@@ -23,7 +22,6 @@ import androidx.compose.material.icons.rounded.Bed
 import androidx.compose.material.icons.rounded.Cyclone
 import androidx.compose.material.icons.rounded.Emergency
 import androidx.compose.material.icons.rounded.Fastfood
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Medication
 import androidx.compose.material.icons.rounded.Money
 import androidx.compose.material.icons.rounded.Psychology
@@ -33,7 +31,6 @@ import androidx.compose.material.icons.rounded.SportsGymnastics
 import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedAssistChip
@@ -58,7 +55,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -70,8 +66,7 @@ import pherus.health.viewModel.MainViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun FeatureScreen(router: NavHostController, viewmodel: MainViewModel) {
-    val scrollState = rememberScrollState()
+fun FeatureScreen(router: NavHostController, viewmodel: MainViewModel, lazyScroll: LazyListState) {
     val coroutine = rememberCoroutineScope()
     val features = viewmodel.remoteCollection.collectAsState().value
     var menuDropdown by rememberSaveable { mutableStateOf(false) }
@@ -87,194 +82,164 @@ fun FeatureScreen(router: NavHostController, viewmodel: MainViewModel) {
         viewmodel.initail()
     }
 
-    FlowColumn(
+    val filteredFeatures = features?.filter {
+        if (menuSelected == "All") it.enabled else !it.enabled
+    } ?: emptyList()
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(state = scrollState, true)
             .padding(start = 10.dp, end = 10.dp),
+        state = lazyScroll,
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            Box(modifier = Modifier.size(185.dp)) {
+        item {
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10)
+            ) {
                 Column(
-                    modifier = Modifier.size(180.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        Column(
-                            modifier = Modifier.align(alignment = Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                    Text(
+                        text = "Pherus Health assistant",
+                        fontWeight = FontWeight.Light,
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "Pherus Health, your health score went down 28% last week",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        lineHeight = 13.sp
+                    )
+
+                    ElevatedAssistChip(
+                        onClick = {},
+                        label = {
                             Text(
-                                text = "8.8",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 38.sp
+                                text = "Let's discuss",
+                                fontWeight = FontWeight.Light,
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.background
                             )
-                            Row(
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "health score",
-                                    fontWeight = FontWeight.Light,
-                                    color = Color.Gray
-                                )
-                                Icon(
-                                    Icons.Rounded.Info,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-                    }
+                        },
+                        colors = AssistChipDefaults.elevatedAssistChipColors(
+                            MaterialTheme.colorScheme.primary
+                        ),
+                        shape = RoundedCornerShape(100)
+                    )
                 }
-
-                CircularProgressIndicator(
-                    progress = { 0.8F },
-                    modifier = Modifier.fillMaxSize(),
-                    strokeWidth = 5.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.onPrimary,
-                    strokeCap = StrokeCap.Round,
-                )
             }
+        }
 
+        item {
             Row(
-                modifier = Modifier,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 ElevatedButton(onClick = {}) {
                     Text(text = "Plan check-up")
                 }
 
-                FilledIconButton(
-                    onClick = {}
+                Row(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Icon(Icons.Rounded.Science, contentDescription = null)
-                }
-
-                FilledIconButton(
-                    onClick = {}
-                ) {
-                    Icon(Icons.Rounded.Money, contentDescription = null)
-                }
-
-                FilledIconButton(
-                    onClick = {}
-                ) {
-                    Icon(Icons.AutoMirrored.Rounded.Notes, contentDescription = null)
-                }
-            }
-        }
-
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(3.dp)
-            ) {
-                Text(
-                    text = "Pherus Health assistant",
-                    fontWeight = FontWeight.Light,
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-                Text(
-                    text = "Pherus Health, your health score went down 28% last week",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    lineHeight = 13.sp
-                )
-
-                ElevatedAssistChip(
-                    onClick = {},
-                    label = {
-                        Text(
-                            text = "Let's discuss",
-                            fontWeight = FontWeight.Light,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.background
-                        )
-                    },
-                    colors = AssistChipDefaults.elevatedAssistChipColors(
-                        MaterialTheme.colorScheme.primary
-                    ),
-                    shape = RoundedCornerShape(100)
-                )
-            }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(0.7F),
-            ) {
-                Text(
-                    text = "Health systems",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-            }
-
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.weight(0.3F)
-            ) {
-                ElevatedAssistChip(
-                    onClick = {
-                        menuDropdown = true
-                    },
-                    label = {
-                        Text(text = menuSelected)
-                    },
-                    shape = RoundedCornerShape(100)
-                )
-
-                if (menuDropdown) {
-                    DropdownMenu(
-                        expanded = true,
-                        onDismissRequest = {
-                            menuDropdown = false
-                        },
-                        modifier = Modifier.padding(5.dp)
+                    FilledIconButton(
+                        onClick = {}
                     ) {
-                        menuLists.forEach { item ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = item,
-                                        fontWeight = FontWeight.Light,
-                                        fontSize = 12.sp,
-                                        lineHeight = 12.sp,
-                                        color = if (menuSelected.contains(item)) MaterialTheme.colorScheme.primary else Color.Gray
-                                    )
-                                },
-                                onClick = {
-                                    menuSelected = item
-                                    menuDropdown = false
-                                }
-                            )
+                        Icon(Icons.Rounded.Science, contentDescription = null)
+                    }
+
+                    FilledIconButton(
+                        onClick = {}
+                    ) {
+                        Icon(Icons.Rounded.Money, contentDescription = null)
+                    }
+
+                    FilledIconButton(
+                        onClick = {}
+                    ) {
+                        Icon(Icons.AutoMirrored.Rounded.Notes, contentDescription = null)
+                    }
+                }
+            }
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(0.7F),
+                ) {
+                    Text(
+                        text = "Health systems",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 23.sp,
+                        lineHeight = 23.sp,
+                        maxLines = 1
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.weight(0.3F)
+                ) {
+                    ElevatedAssistChip(
+                        onClick = {
+                            menuDropdown = true
+                        },
+                        label = {
+                            Text(text = menuSelected)
+                        },
+                        shape = RoundedCornerShape(100)
+                    )
+
+                    if (menuDropdown) {
+                        DropdownMenu(
+                            expanded = true,
+                            onDismissRequest = {
+                                menuDropdown = false
+                            },
+                            modifier = Modifier.padding(5.dp)
+                        ) {
+                            menuLists.forEach { item ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = item,
+                                            fontWeight = FontWeight.Light,
+                                            fontSize = 12.sp,
+                                            lineHeight = 12.sp,
+                                            color = if (menuSelected.contains(item)) MaterialTheme.colorScheme.primary else Color.Gray
+                                        )
+                                    },
+                                    onClick = {
+                                        menuSelected = item
+                                        menuDropdown = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
 
-        HorizontalDivider(modifier = Modifier.fillMaxWidth())
+        item {
+            HorizontalDivider(modifier = Modifier.fillMaxWidth())
+        }
 
-        features?.filter {
-            if (menuSelected == "All") it.enabled else !it.enabled
-        }?.forEachIndexed { _, healthModule ->
+        items(filteredFeatures.size) { index ->
+            val healthModule = filteredFeatures[index]
+
             Box(modifier = Modifier.fillMaxSize()) {
                 OutlinedCard(
                     modifier = Modifier.fillMaxWidth(),
@@ -410,6 +375,8 @@ fun FeatureScreen(router: NavHostController, viewmodel: MainViewModel) {
             }
         }
 
-        Spacer(modifier = Modifier.size(20.dp))
+        item {
+            Spacer(modifier = Modifier.size(20.dp))
+        }
     }
 }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -38,12 +39,14 @@ import com.tencent.mmkv.MMKV
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import pherus.health.R
+import pherus.health.config.Config.CollectionProps
 import pherus.health.config.Config.HealthModule
 import pherus.health.config.Config.PatientInformation
 import java.io.IOException
@@ -61,19 +64,20 @@ class MainViewModel : ViewModel() {
     private val _remoteCollection = MutableStateFlow<List<HealthModule>?>(null)
     val remoteCollection: StateFlow<List<HealthModule>?> = _remoteCollection.asStateFlow()
 
+    private val _collection = MutableStateFlow<List<CollectionProps>?>(null)
+    val collection: StateFlow<List<CollectionProps>?> = _collection.asStateFlow()
+
     private var lastFetchedData: PatientInformation? = null
 
 
     private val mainStorage by lazy {
         MMKV.mmkvWithID(
-            MmkvManager.ID_MAIN,
-            MMKV.MULTI_PROCESS_MODE
+            MmkvManager.ID_MAIN, MMKV.MULTI_PROCESS_MODE
         )
     }
     private val settingsStorage by lazy {
         MMKV.mmkvWithID(
-            MmkvManager.ID_SETTING,
-            MMKV.MULTI_PROCESS_MODE
+            MmkvManager.ID_SETTING, MMKV.MULTI_PROCESS_MODE
         )
     }
 
@@ -91,7 +95,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun isAuthenticated(): Boolean {
-        return auth.currentUser === null
+        return auth.currentUser != null
     }
 
     private fun isCurrentUserUid(): String {
@@ -100,13 +104,12 @@ class MainViewModel : ViewModel() {
 
     suspend fun isUserAvailable(): Boolean {
         val userUid = isCurrentUserUid()
-        return !database.getReference("_patients").child(userUid).get().await().exists()
+        return database.getReference("_patients").child(userUid).get().await().exists()
     }
 
     @Composable
     fun isGoogleAuthentication(
-        onAuthComplete: (AuthResult) -> Unit,
-        onAuthError: (ApiException) -> Unit
+        onAuthComplete: (AuthResult) -> Unit, onAuthError: (ApiException) -> Unit
     ): ManagedActivityResultLauncher<Intent, ActivityResult> {
         val scope = rememberCoroutineScope()
         return rememberLauncherForActivityResult(StartActivityForResult()) { result ->
@@ -136,8 +139,7 @@ class MainViewModel : ViewModel() {
             userUid
         }
 
-        database.getReference("_patients").child(path)
-            .setValue(value)
+        database.getReference("_patients").child(path).setValue(value)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     onComplete(true, null)
@@ -149,8 +151,7 @@ class MainViewModel : ViewModel() {
                         onComplete(false, null)
                     }
                 }
-            }
-            .await()
+            }.await()
     }
 
     private fun fetchFromDatabase(
@@ -186,24 +187,17 @@ class MainViewModel : ViewModel() {
     }
 
     fun uploadImage(
-        context: Context,
-        imageUri: Uri,
-        uploadUrl: String? = null,
-        onUploadState: (Boolean) -> Unit
+        context: Context, imageUri: Uri, uploadUrl: String? = null, onUploadState: (Boolean) -> Unit
     ) {
         val result = getImageNameAndExtension(context, imageUri)
         storage.run {
             onUploadState(true)
-            getReference("patients")
-                .child(isCurrentUserUid())
-                .child("profileAvatar")
-                .child("${result!!.first}.${result.second}")
-                .putFile(imageUri)
+            getReference("patients").child(isCurrentUserUid()).child("profileAvatar")
+                .child("${result!!.first}.${result.second}").putFile(imageUri)
                 .addOnSuccessListener { taskSnapshot ->
                     taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { downloadUri ->
                         CoroutineScope(Dispatchers.IO).launch {
-                            writeToDatabase(
-                                key = uploadUrl,
+                            writeToDatabase(key = uploadUrl,
                                 value = downloadUri.toString(),
                                 onComplete = { success, error ->
                                     CoroutineScope(Dispatchers.Main).launch {
@@ -212,15 +206,13 @@ class MainViewModel : ViewModel() {
                                             println("Error uploading image: ${error.message}")
                                         }
                                     }
-                                }
-                            )
+                                })
                         }
                     }?.addOnFailureListener { exception ->
                         onUploadState(false)
                         println("Error getting download URL: ${exception.message}")
                     }
-                }
-                .addOnFailureListener { exception ->
+                }.addOnFailureListener { exception ->
                     onUploadState(false)
                     println("Error uploading file: ${exception.message}")
                 }
@@ -291,29 +283,61 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun fetchModules() {
+    private fun fetchCollection(default: Pair<String, String>) {
         val remoteConfig = Firebase.remoteConfig
-        remoteConfig.setDefaultsAsync(mapOf("health_features" to "[]"))
-        remoteConfig.fetchAndActivate().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val featuresPref = isPreferenceRetrieve("health_features", "[]") as? String
-                val featuresJson = remoteConfig.getString("health_features")
-                if (!featuresJson.contentEquals(featuresPref)) {
-                    isPreferenceStore("health_features", featuresJson)
+        remoteConfig.setDefaultsAsync(mapOf(default.first to default.second))
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val featuresPref =
+                        isPreferenceRetrieve(default.first, default.second) as? String
+                    val featuresJson = remoteConfig.getString(default.first)
+                    if (featuresJson.isEmpty()) {
+                        logError("No value for key ${default.first}, setting to default.")
+                        isPreferenceStore(default.first, default.second)
+                    } else if (featuresPref != featuresJson) {
+                        isPreferenceStore(default.first, featuresJson)
+                    }
+                } else {
+                    logError("Fetch failed")
                 }
-            } else {
-                println("Fetch failed")
+            }.addOnFailureListener {
+                logError("Fetch failed with exception: ${it.message}")
             }
-        }.addOnFailureListener {
-            println("Fetch failed with exception: ${it.message}")
+    }
+
+    private fun fetchModules() {
+        viewModelScope.launch {
+            fetchCollection("health_features" to "[]")
+            delay(1000)
+            fetchCollection("collection_features" to "[]")
         }
     }
 
+    private fun logError(message: String) {
+        println("Error: $message")
+    }
+
     private fun fetchLocalModules() {
-        val featuresJson = isPreferenceRetrieve("health_features", "[]") as? String
-        featuresJson?.let {
-            val features: List<HealthModule> = parseFeatures(it)
-            _remoteCollection.value = features
+        isPreferenceRetrieve("health_features", "[]")?.let {
+            runCatching {
+                parseFeatures(it.toString())
+            }.onSuccess {
+                println("health features: $it")
+                _remoteCollection.value = it
+            }.onFailure {
+                logError("Failed to parse features JSON: ${it.message}")
+            }
+        }
+
+        isPreferenceRetrieve("collection_features", "[]")?.let {
+            runCatching {
+                parseCollection(it.toString())
+            }.onSuccess {
+                println("collection features: $it")
+                _collection.value = it
+            }.onFailure {
+                logError("Failed to parse collection JSON: ${it.message}")
+            }
         }
     }
 
@@ -343,7 +367,7 @@ class MainViewModel : ViewModel() {
         val geocoder = Geocoder(context, Locale.getDefault())
         try {
             val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-            if (addresses != null && addresses.isNotEmpty()) {
+            if (!addresses.isNullOrEmpty()) {
                 val countryName = addresses[0].countryName
                 val locality = addresses[0].locality
                 onAddressReceived(countryName, locality)
@@ -356,7 +380,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun getCountryCode(countryName: String): String? {
+    private fun getCountryCode(countryName: String): String? {
         val locales = Locale.getAvailableLocales()
         for (locale in locales) {
             if (locale.displayCountry.equals(countryName, ignoreCase = true)) {
@@ -370,6 +394,13 @@ class MainViewModel : ViewModel() {
         val gson = Gson()
         val type = object : TypeToken<List<HealthModule>>() {}.type
         val modules: List<HealthModule> = gson.fromJson(json, type)
+        return modules
+    }
+
+    private fun parseCollection(json: String): List<CollectionProps> {
+        val gson = Gson()
+        val type = object : TypeToken<List<CollectionProps>>() {}.type
+        val modules: List<CollectionProps> = gson.fromJson(json, type)
         return modules
     }
 
@@ -414,5 +445,125 @@ class MainViewModel : ViewModel() {
         }
 
         return if (name != null && extension != null) Pair(name!!, extension!!) else null
+    }
+
+    suspend fun generatePatientsId(
+        countryName: String
+    ) {
+        if (isAuthenticated()) {
+            if (isUserAvailable()) {
+                val userRef = database.getReference("_patients").child(isCurrentUserUid())
+                    .child("basicInformations").child("patientsId")
+                val existingId = userRef.get().await().getValue(String::class.java)
+                if (existingId.isNullOrEmpty()) {
+                    // Reference to the _patients node in the database
+                    val patientsRef = database.getReference("_patients")
+
+                    // Fetch all existing patient IDs
+                    val existingIds = mutableListOf<String>()
+                    val snapshot = patientsRef.get().await()
+                    for (snaps in snapshot.children) {
+                        val patientId = snaps.child("basicInformations").child("patientsId")
+                            .getValue(String::class.java)
+                        if (patientId != null) {
+                            existingIds.add(patientId)
+                        }
+                    }
+
+                    // Generate the next unique ID
+                    val patientsIdentifier = "PAT"
+                    val countryCode = getCountryCode(countryName = countryName)
+
+                    val generatedFirstFour = generateFirstFour(existingIds)
+                    val generateSecondFour = generateSecondFour(existingIds)
+
+                    when {
+                        countryCode!!.isNotEmpty() -> {
+                            val newUserId =
+                                "$patientsIdentifier-$generatedFirstFour-$generateSecondFour$countryCode"
+                            when {
+                                newUserId.isNotEmpty() -> {
+                                    // Save the new unique ID to the current user's profile
+                                    patientsRef.child(isCurrentUserUid()).child("basicInformations")
+                                        .child("patientsId").setValue(newUserId)
+
+                                    patientsRef.child(isCurrentUserUid())
+                                        .child("contactInformation").child("countryResident")
+                                        .setValue(countryName)
+                                }
+
+                                else -> {
+                                    return
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun generateFirstFour(existingIds: List<String>): String {
+        // Generate 4 sequential digits and alphabets starting from 00AA
+        val pattern = "^[0-9]{2}[A-Z]{2}$".toRegex()
+        val existingFirstFour =
+            existingIds.mapNotNull { it.split("-").getOrNull(1) }.filter { pattern.matches(it) }
+        var newFirstFour = "00AA"
+        if (existingFirstFour.isNotEmpty()) {
+            val lastFirstFour = existingFirstFour.maxOrNull()
+            newFirstFour = incrementFirstFour(lastFirstFour!!)
+        }
+        return newFirstFour
+    }
+
+    private fun incrementFirstFour(lastFirstFour: String): String {
+        val digits = lastFirstFour.substring(0, 2).toInt()
+        val letters = lastFirstFour.substring(2)
+        var newDigits = digits
+        var newLetters = letters
+
+        if (letters == "ZZ") {
+            newDigits += 1
+            newLetters = "AA"
+        } else {
+            val charArray = newLetters.toCharArray()
+            if (charArray[1] == 'Z') {
+                charArray[0] = charArray[0] + 1
+                charArray[1] = 'A'
+            } else {
+                charArray[1] = charArray[1] + 1
+            }
+            newLetters = String(charArray)
+        }
+
+        return "%02d%s".format(newDigits, newLetters)
+    }
+
+    private fun generateSecondFour(existingIds: List<String>): String {
+        // Generate sequential IDs starting from A001
+        val pattern = "^[A-Z][0-9]{3}$".toRegex()
+        val existingSecondFour =
+            existingIds.mapNotNull { it.split("-").getOrNull(2) }.filter { pattern.matches(it) }
+        var newSecondFour = "A001"
+        if (existingSecondFour.isNotEmpty()) {
+            val lastSecondFour = existingSecondFour.maxOrNull()
+            newSecondFour = incrementSecondFour(lastSecondFour!!)
+        }
+        return newSecondFour
+    }
+
+    private fun incrementSecondFour(lastSecondFour: String): String {
+        val letter = lastSecondFour.substring(0, 1)
+        val digits = lastSecondFour.substring(1).toInt()
+
+        var newLetter = letter
+        var newDigits = digits + 1
+
+        if (newDigits > 999) {
+            newLetter = (letter[0] + 1).toString()
+            newDigits = 1
+        }
+
+        return "%s%03d".format(newLetter, newDigits)
     }
 }

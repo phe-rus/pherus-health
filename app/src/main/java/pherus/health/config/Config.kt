@@ -76,6 +76,7 @@ object Config {
 
     @Keep
     data class BasicInformations(
+        val patientsId: String? = null,
         val preferedName: String? = null,
         val genderIdentity: String? = null,
         val avatarHolder: String? = null,
@@ -247,5 +248,12 @@ object Config {
         val timeOfDay: List<TimesOfDay>? = emptyList(),
         val medicineForm: MedicineForm? = null,
         val personalNotes: String? = null
+    ) : Serializable
+
+    @Keep
+    data class CollectionProps(
+        val name: String,
+        val image: String,
+        val enabled: Boolean,
     ) : Serializable
 }
